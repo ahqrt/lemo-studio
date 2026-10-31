@@ -1,0 +1,40 @@
+{
+  "name": "dsh-lemo-studio",
+  "version": "2.0.0",
+  "private": true,
+  "description": "视频工坊 · Lemo-Opuscar 影棚：66 种风格 → 简报 → Treatment → 风格帧 → 成片（DeepSeek Harness UI 插件）",
+  "type": "module",
+  "main": "./index.js",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "lib",
+    "assets",
+    "package.json",
+    "README.md",
+    "src",
+    "scripts"
+  ],
+  "dsh": {
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-layout",
+        "@deepseek-ai/dsh-client-ui-conversation"
+      ]
+    }
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "posters": "node scripts/fetch-posters.mjs"
+  }
+}
