@@ -1,0 +1,17 @@
+.DS_Store
+node_modules/
+films/
+projects/
+lemo-opuscar-dsh/
+tools/
+Table-VideoSOP/
+demo/
+ai-check*/
+jojo-*/
+remotion-*/
+team-wired/
+ticket/
+
+# Downloaded style posters are not redistributed in the repo.
+.dsh-plugin/lemo-studio/assets/posters/
+design/assets/posters/
