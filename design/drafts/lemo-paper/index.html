@@ -1,0 +1,2238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>影片目录 · 视频工坊</title>
+<style>
+  :root {
+    --paper: #f6f1e7;
+    --paper-2: #efe7d8;
+    --ink: #1b1a17;
+    --ink-2: #3c3934;
+    --ink-3: #6f6a62;
+    --ink-4: #9a9388;
+    --rule: rgba(27, 26, 23, 0.16);
+    --rule-2: rgba(27, 26, 23, 0.38);
+    --red: #c8402c;
+    --serif: "Songti SC", "STSong", "SimSun", "Noto Serif CJK SC", serif;
+    --sans: "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", sans-serif;
+    --mono: "SF Mono", "Menlo", "ui-monospace", monospace;
+    --rail: 156px;
+    --pad: 36px;
+    --chapters: 172px;
+    --agent: 304px;
+    --gap: 48px;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.5;
+    font-weight: 400;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  button, input, textarea { font: inherit; color: inherit; border-radius: 0; }
+  button { background: none; border: 0; padding: 0; cursor: pointer; text-align: left; }
+  img { display: block; }
+  h1, h2, h3, p, figure, dl, dd, ul, ol { margin: 0; padding: 0; }
+  ul, ol { list-style: none; }
+  ::selection { background: var(--red); color: var(--paper); }
+  :focus-visible { outline: 1px solid var(--red); outline-offset: 2px; }
+  [hidden] { display: none !important; }
+  .view { display: none; height: 100%; }
+  #view-gallery.on { display: grid; grid-template-columns: var(--rail) minmax(0, 1fr); }
+  #view-new.on { display: grid; grid-template-rows: 44px minmax(0, 1fr); }
+  #view-desk.on { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; }
+
+  .mark {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: var(--red);
+    margin-right: 8px;
+    vertical-align: 1px;
+    flex: none;
+  }
+  .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  .kicker {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--ink-3);
+  }
+
+  /* —— gallery rail —— */
+  .rail {
+    background: var(--paper-2);
+    border-right: 1px solid var(--rule);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    min-width: 0;
+  }
+  .rail-head { padding: 22px 14px 12px; border-bottom: 1px solid var(--rule); }
+  .rail-head .brand {
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
+  .rail-head strong {
+    display: block;
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 22px;
+    letter-spacing: 0.06em;
+  }
+  .tabs { flex: 1; overflow: auto; padding: 8px 0; }
+  .tab {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 6px;
+    width: 100%;
+    padding: 7px 12px;
+    border-left: 2px solid transparent;
+    font-size: 13px;
+    color: var(--ink-2);
+  }
+  .tab .n { font-family: var(--mono); font-size: 11px; color: var(--ink-4); }
+  .tab:hover { color: var(--ink); }
+  .tab[aria-current="true"] {
+    background: var(--paper);
+    color: var(--ink);
+    border-left-color: var(--ink);
+    margin-right: -1px;
+  }
+  .rail-foot {
+    padding: 12px 14px 16px;
+    border-top: 1px solid var(--rule);
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--ink-3);
+    line-height: 1.6;
+  }
+
+  .catalog-main {
+    height: 100%;
+    overflow: auto;
+    padding: 0 0 72px;
+    min-width: 0;
+  }
+  .mast { padding: 28px var(--pad) 0; }
+  .call, #gallery-root, .colophon { padding-left: var(--pad); padding-right: var(--pad); }
+  .mast-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+  }
+  .brand { display: flex; align-items: center; font-size: 13px; }
+  .lib {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--ink-2);
+    white-space: nowrap;
+  }
+  .mast-title {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 56px;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    margin: 14px 0 10px;
+  }
+  .mast-sub { color: var(--ink-2); font-size: 14px; margin-bottom: 18px; }
+  .rule-ink { border: 0; border-top: 1px solid var(--ink); margin: 0 0 16px; }
+
+  .call h2 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 18px;
+    margin: 16px 0 8px;
+  }
+  .call-cols, .call-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) 64px minmax(120px, 1.15fr) 36px;
+    gap: 12px;
+    align-items: baseline;
+  }
+  .call-cols {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--ink-4);
+    padding-bottom: 4px;
+  }
+  .call-row {
+    width: 100%;
+    padding: 8px 0;
+    border-top: 1px solid var(--rule);
+    font-size: 14px;
+  }
+  .call-row:hover { background: var(--paper-2); }
+  .call-row .ttl { font-family: var(--serif); font-size: 16px; }
+  .call-row .dur { font-family: var(--mono); font-size: 12px; white-space: nowrap; }
+  .call-row .st.bad { color: var(--red); }
+  .call-row .go {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--ink-3);
+    text-align: right;
+  }
+  .call-row:hover .go { color: var(--ink); }
+
+  .tools {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin: 18px 0 22px;
+    padding: 10px var(--pad);
+    background: var(--paper);
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+  }
+  .search-k {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--ink-3);
+    flex: none;
+  }
+  .search {
+    -webkit-appearance: none;
+    appearance: none;
+    flex: 1;
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    border-bottom: 1px solid var(--ink);
+    background: transparent;
+    font-family: var(--serif);
+    font-size: 16px;
+    padding: 4px 0;
+    outline: none;
+  }
+  .search:focus { border-bottom-color: var(--ink); border-bottom-width: 1px; }
+  .search::placeholder { color: var(--ink-4); font-family: var(--sans); font-size: 13px; }
+  .search::-webkit-search-decoration,
+  .search::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
+  .count, .folio {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--ink-3);
+    white-space: nowrap;
+  }
+  .folio { color: var(--ink); }
+  .clear-q {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .chapter-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    border-top: 1px solid var(--ink);
+    padding-top: 12px;
+    margin: 4px 0 22px;
+  }
+  .chapter-head h2 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 28px;
+  }
+  .chapter-head .en {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--ink-3);
+  }
+  .chapter-head .count {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-3);
+  }
+
+  .plates {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: var(--gap);
+    row-gap: 42px;
+    position: relative;
+  }
+  .plates::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 1px;
+    background: var(--rule-2);
+    transform: translateX(-0.5px);
+    pointer-events: none;
+  }
+  .plate {
+    display: block;
+    width: 100%;
+    color: inherit;
+    animation: rise 480ms ease both;
+  }
+  .plate:nth-child(2) { animation-delay: 40ms; }
+  .plate:nth-child(3) { animation-delay: 80ms; }
+  .plate:nth-child(4) { animation-delay: 120ms; }
+  .plate:nth-child(5) { animation-delay: 160ms; }
+  .plate:nth-child(6) { animation-delay: 200ms; }
+  .plate-img {
+    position: relative;
+    overflow: hidden;
+    background: var(--ink);
+    aspect-ratio: 16 / 9;
+  }
+  .plate-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 520ms ease;
+  }
+  .plate-img::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 48%, rgba(27, 26, 23, 0.5) 100%);
+    opacity: 0;
+    transition: opacity 420ms ease;
+    pointer-events: none;
+  }
+  .hover-meta {
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 10px;
+    z-index: 1;
+    color: var(--paper);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    line-height: 1.4;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 420ms ease, transform 420ms ease;
+    pointer-events: none;
+  }
+  .plate:hover img, .plate:focus-visible img { transform: scale(1.035); }
+  .plate:hover .plate-img::after, .plate:focus-visible .plate-img::after { opacity: 1; }
+  .plate:hover .hover-meta, .plate:focus-visible .hover-meta { opacity: 1; transform: none; }
+  .plate-cap {
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr);
+    column-gap: 10px;
+    row-gap: 2px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--rule-2);
+  }
+  .plate-num {
+    grid-row: 1 / span 4;
+    font-family: var(--serif);
+    font-size: 20px;
+    line-height: 1.15;
+  }
+  .plate-cn { font-family: var(--serif); font-size: 18px; line-height: 1.25; }
+  .plate-en {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-3);
+    letter-spacing: 0.02em;
+  }
+  .plate-line {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--ink-2);
+    margin-top: 3px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .plate-foot {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 4px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-3);
+  }
+  .empty {
+    padding: 48px 0;
+    border-top: 1px solid var(--ink);
+  }
+  .empty p { font-family: var(--serif); font-size: 22px; margin-bottom: 12px; }
+  .colophon {
+    margin-top: 48px;
+    padding-top: 16px;
+    border-top: 1px solid var(--ink);
+    text-align: center;
+    color: var(--ink-3);
+    font-size: 13px;
+  }
+  .colophon .end {
+    font-family: var(--serif);
+    font-size: 20px;
+    color: var(--ink);
+    letter-spacing: 0.4em;
+    margin-bottom: 6px;
+  }
+
+  /* —— new —— */
+  .new-top {
+    display: grid;
+    grid-template-columns: 120px minmax(0, 1fr) auto;
+    gap: 16px;
+    align-items: center;
+    padding: 0 24px;
+    border-bottom: 1px solid var(--ink);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+  }
+  .new-top button { letter-spacing: 0.08em; }
+  .new-top button:hover { border-bottom: 1px solid var(--ink); }
+  #new-crumb { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink-2); }
+  .new-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+    min-height: 0;
+  }
+  .new-hero, .new-form { overflow: auto; min-width: 0; padding: 28px 36px 48px; }
+  .new-form { border-left: 1px solid var(--rule-2); }
+  .hero-img { background: var(--ink); aspect-ratio: 16 / 9; overflow: hidden; }
+  .hero-img img { width: 100%; height: 100%; object-fit: cover; }
+  .hero-num {
+    margin-top: 12px;
+    font-family: var(--serif);
+    font-size: 20px;
+  }
+  .hero-cn {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 36px;
+    line-height: 1.15;
+    margin: 4px 0 6px;
+  }
+  .hero-en { font-family: var(--mono); font-size: 12px; color: var(--ink-3); letter-spacing: 0.03em; }
+  .hero-line {
+    font-family: var(--serif);
+    font-size: 16px;
+    line-height: 1.55;
+    margin: 14px 0 18px;
+    max-width: 36em;
+  }
+  .specs div, .field {
+    display: grid;
+    grid-template-columns: 72px minmax(0, 1fr);
+    gap: 12px;
+    align-items: baseline;
+    padding: 8px 0;
+    border-top: 1px solid var(--rule);
+    font-size: 14px;
+  }
+  .specs dt, .field .label, .specs .label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--ink-3);
+  }
+  .specs dd { margin: 0; }
+  .form-title {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 32px;
+    margin-bottom: 6px;
+  }
+  .form-lead { color: var(--ink-2); margin-bottom: 18px; max-width: 36em; }
+  .idea-label {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: baseline;
+    margin-bottom: 6px;
+  }
+  .idea-label { flex-wrap: wrap; }
+  .idea-label > span:first-child { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; color: var(--ink-3); }
+  .eg { font-family: var(--serif); font-size: 13px; color: var(--ink-4); letter-spacing: 0; }
+  .idea {
+    width: 100%;
+    min-height: 148px;
+    border: 1px solid var(--ink);
+    border-left-width: 2px;
+    background: transparent;
+    font-family: var(--serif);
+    font-size: 20px;
+    line-height: 1.55;
+    padding: 12px 14px;
+    resize: vertical;
+    outline: none;
+  }
+  .idea:focus { border-left-color: var(--ink); }
+  .choice {
+    color: var(--ink-3);
+    margin-right: 18px;
+    padding: 0 0 2px;
+    border-bottom: 1px solid transparent;
+  }
+  .choice[aria-pressed="true"] { color: var(--ink); border-bottom-color: var(--ink); }
+  .choice:hover { color: var(--ink); }
+  .hint { display: block; color: var(--ink-3); font-size: 12px; margin-top: 6px; line-height: 1.5; }
+  .form-next { margin-top: 28px; max-width: 28em; color: var(--ink-3); font-size: 13px; line-height: 1.55; }
+  .field.stack { align-items: start; }
+  .disclose {
+    margin: 18px 0 8px;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+  }
+  .disclose::before { content: "+"; margin-right: 8px; }
+  .disclose[aria-expanded="true"]::before { content: "−"; }
+  .advanced { padding: 0 0 8px 16px; border-left: 1px solid var(--rule); }
+  .form-error { color: var(--red); font-family: var(--serif); font-size: 15px; margin-top: 16px; }
+  .actions { display: flex; align-items: center; gap: 18px; margin-top: 22px; }
+  .btn-ink {
+    background: var(--ink);
+    color: var(--paper);
+    border: 1px solid var(--ink);
+    padding: 10px 16px;
+    font-family: var(--serif);
+    font-size: 16px;
+    text-align: center;
+  }
+  .btn-ink:hover { background: var(--red); border-color: var(--red); }
+  .btn-ink:disabled { opacity: 0.45; cursor: default; }
+  .btn-ink:disabled:hover { background: var(--ink); border-color: var(--ink); }
+  .btn-ghost {
+    border: 1px solid var(--ink);
+    padding: 9px 14px;
+    font-family: var(--serif);
+    font-size: 15px;
+    text-align: center;
+  }
+  .btn-ghost:hover { border-color: var(--red); color: var(--red); }
+  .btn-text { border-bottom: 1px solid transparent; padding-bottom: 1px; }
+  .btn-text:hover { border-bottom-color: var(--ink); }
+
+  /* —— desk —— */
+  .desk-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 4px 28px;
+    align-items: end;
+    padding: 14px 24px 12px;
+    border-bottom: 1px solid var(--ink);
+    min-width: 0;
+  }
+  .desk-path {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-3);
+    letter-spacing: 0.02em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .desk-title {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 32px;
+    line-height: 1.15;
+    outline: none;
+    border-bottom: 1px solid transparent;
+    display: inline-block;
+    max-width: 100%;
+    min-width: 4em;
+  }
+  .desk-title:focus { border-bottom-color: var(--ink); }
+  .desk-meta { color: var(--ink-2); font-size: 13px; margin-top: 4px; }
+  .desk-side { text-align: right; }
+  .desk-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+  .desk-actions .btn-ghost, .desk-actions .btn-ink { font-size: 14px; padding: 7px 12px; }
+  #live {
+    min-height: 1.2em;
+    margin-top: 6px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.03em;
+    color: var(--ink-2);
+  }
+  #live.hot { color: var(--red); }
+  .desk-body {
+    display: grid;
+    grid-template-columns: var(--chapters) minmax(0, 1fr) var(--agent);
+    min-height: 0;
+  }
+  .desk-body.agent-closed { grid-template-columns: var(--chapters) minmax(0, 1fr) 36px; }
+  .chapters {
+    background: var(--paper-2);
+    border-right: 1px solid var(--rule);
+    overflow: auto;
+    min-width: 0;
+    padding: 12px 0 20px;
+  }
+  .rail-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    color: var(--ink-4);
+    padding: 4px 14px 8px;
+  }
+  .ch {
+    display: grid;
+    grid-template-columns: 22px minmax(0, 1fr) auto;
+    gap: 6px;
+    width: 100%;
+    padding: 8px 12px;
+    border-left: 2px solid transparent;
+    font-size: 13px;
+    color: var(--ink-2);
+  }
+  .ch .num { font-family: var(--mono); font-size: 11px; }
+  .ch .name { min-width: 0; }
+  .ch .ch-mark { font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em; color: var(--ink-4); }
+  .ch.future { color: var(--ink-4); }
+  .ch[aria-current="true"] {
+    background: var(--paper);
+    color: var(--ink);
+    border-left-color: var(--ink);
+    margin-right: -1px;
+  }
+  .ch.todo { border-left-color: var(--red); }
+  .ch.todo .num, .ch.todo .ch-mark { color: var(--red); }
+  .ch:hover { color: var(--ink); }
+  .work { overflow: auto; min-width: 0; background: var(--paper); }
+  .work-inner { animation: rise 280ms ease; }
+  .work-head {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 24px;
+    background: var(--paper);
+    border-bottom: 1px solid var(--rule);
+  }
+  .work-head h2 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 22px;
+    white-space: nowrap;
+  }
+  .sn { font-family: var(--mono); font-size: 12px; color: var(--ink-3); margin-right: 8px; }
+  .work-note { flex: 1; min-width: 0; font-family: var(--serif); font-size: 14px; color: var(--ink-2); }
+  .work-note.bad { color: var(--red); }
+  .work-actions { display: flex; gap: 8px; flex: none; }
+  .file {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--ink-3);
+    white-space: nowrap;
+  }
+  .work-body { padding: 20px 24px 48px; }
+  .manuscript {
+    font-family: var(--serif);
+    font-size: 22px;
+    line-height: 1.55;
+    padding-left: 14px;
+    border-left: 2px solid var(--ink);
+    max-width: 36em;
+    margin-bottom: 22px;
+  }
+  .block-title {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 16px;
+    margin: 22px 0 8px;
+  }
+  .structures li {
+    padding: 10px 0 10px 12px;
+    border-top: 1px solid var(--rule);
+    border-left: 2px solid transparent;
+    max-width: 44em;
+  }
+  .structures li.picked { border-left-color: var(--ink); }
+  .structures .k, .structures .tag {
+    font-family: var(--mono);
+    font-size: 12px;
+    margin-right: 8px;
+  }
+  .structures .tag { color: var(--ink-3); margin-left: 8px; }
+  .shots { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .shots th {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    font-weight: 400;
+    color: var(--ink-3);
+    text-align: left;
+    padding: 0 12px 6px 0;
+  }
+  .shots td {
+    padding: 7px 12px 7px 0;
+    border-top: 1px solid var(--rule);
+    vertical-align: baseline;
+  }
+  .shots .tc, .shots .dur { font-family: var(--mono); font-size: 12px; white-space: nowrap; }
+  .beats {
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.7;
+    padding: 8px 0;
+    border-top: 1px solid var(--ink);
+    border-bottom: 1px solid var(--ink);
+    margin-top: 8px;
+  }
+  .files li {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-2);
+    padding: 4px 0;
+    border-top: 1px solid var(--rule);
+  }
+  .writing { padding: 28px 0; font-family: var(--serif); font-size: 20px; }
+  .caret {
+    display: inline-block;
+    width: 8px;
+    height: 0.9em;
+    background: var(--ink);
+    vertical-align: text-bottom;
+    margin-left: 4px;
+    animation: blink 1s steps(1) infinite;
+  }
+  .still { margin: 0 0 28px; }
+  .still-img {
+    display: block;
+    width: 100%;
+    background: #14120f;
+    overflow: hidden;
+    cursor: zoom-in;
+    aspect-ratio: 16 / 9;
+    padding: 0;
+  }
+  .still-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1.48);
+  }
+  .still-img.pulling img { opacity: 0.38; }
+  .still figcaption { padding-top: 8px; }
+  .still-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: var(--ink-2);
+  }
+  .still-meta .flag { color: var(--red); }
+  .anno {
+    margin-top: 8px;
+    padding-left: 12px;
+    border-left: 2px solid var(--ink);
+    font-family: var(--serif);
+    font-size: 15px;
+    line-height: 1.55;
+    max-width: 42em;
+    color: var(--ink-2);
+  }
+  .still.grey .anno, .still.review .anno { border-left-color: var(--red); color: var(--red); }
+  .anno-k {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--ink-3);
+    margin-right: 8px;
+  }
+  .still .btn-text { margin-top: 8px; font-size: 13px; }
+  .sheet {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px 12px;
+    margin-top: 16px;
+  }
+  .sheet .crop { overflow: hidden; background: #14120f; aspect-ratio: 16 / 9; }
+  .sheet img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.45); }
+  .sheet figcaption {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding-top: 4px;
+    color: var(--ink-2);
+  }
+  .skip-note { font-family: var(--serif); font-size: 18px; line-height: 1.55; max-width: 36em; }
+  .delivery { display: block; }
+  .player {
+    position: relative;
+    width: min(100%, calc((100vh - 430px) * 16 / 9));
+    background: #14120f;
+    aspect-ratio: 16 / 9;
+    cursor: pointer;
+    overflow: hidden;
+  }
+  .player img { width: 100%; height: 100%; object-fit: cover; }
+  .player::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 72px;
+    background: linear-gradient(to top, rgba(20, 18, 15, 0.78), transparent);
+    pointer-events: none;
+  }
+  .player.empty::after { display: none; }
+  .no-film {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--paper);
+    font-family: var(--serif);
+    font-size: 22px;
+    letter-spacing: 0.12em;
+  }
+  .play {
+    position: absolute;
+    left: 14px;
+    bottom: 16px;
+    z-index: 1;
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--paper);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .glyph {
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 6px 0 6px 11px;
+    border-color: transparent transparent transparent var(--paper);
+    margin-left: 2px;
+  }
+  .player.playing .glyph {
+    width: 10px;
+    height: 12px;
+    border: 0;
+    margin: 0;
+    background:
+      linear-gradient(var(--paper), var(--paper)) left / 2px 100% no-repeat,
+      linear-gradient(var(--paper), var(--paper)) right / 2px 100% no-repeat;
+  }
+  .player .tc {
+    position: absolute;
+    right: 12px;
+    bottom: 18px;
+    z-index: 1;
+    color: var(--paper);
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.06em;
+  }
+  .scrub {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 14px;
+    z-index: 1;
+    cursor: pointer;
+  }
+  .scrub::before {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 2px;
+    background: rgba(246, 241, 231, 0.28);
+  }
+  .scrub i {
+    position: absolute;
+    left: 0; bottom: 0;
+    height: 2px;
+    width: 0%;
+    background: var(--paper);
+  }
+  .readout {
+    margin-top: 8px;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.03em;
+  }
+  .readout.bad { color: var(--red); }
+  .versions h3 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 16px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--ink);
+  }
+  .ver-cols, .ver {
+    display: grid;
+    grid-template-columns: 52px 64px 120px 72px minmax(0, 1fr);
+    gap: 8px 16px;
+    align-items: baseline;
+    width: 100%;
+  }
+  .ver-cols {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--ink-4);
+    padding-bottom: 4px;
+  }
+  .ver {
+    padding: 8px 0;
+    border-top: 1px solid var(--rule);
+    font-size: 14px;
+  }
+  .ver .vid { font-family: var(--mono); font-size: 12px; }
+  .ver[aria-current="true"] .vid { color: var(--ink); }
+  .ver .kind { font-family: var(--serif); }
+  .ver .meta, .ver .vdur { font-family: var(--mono); font-size: 12px; color: var(--ink-2); }
+  .film-open { display: flex; gap: 18px; align-items: baseline; margin-top: 14px; flex-wrap: wrap; }
+  .path {
+    margin-top: 0;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-3);
+    overflow-wrap: anywhere;
+  }
+  .none { font-family: var(--mono); font-size: 12px; color: var(--ink-3); padding-top: 8px; }
+
+  .agent {
+    background: var(--paper-2);
+    border-left: 1px solid var(--rule);
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .agent-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 14px 14px 0;
+  }
+  .agent-head h2 { font-family: var(--serif); font-weight: 400; font-size: 20px; }
+  .agent-head button { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--ink-3); }
+  .agent-head button:hover { color: var(--ink); }
+  #agent-ctx {
+    padding: 6px 14px 10px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-3);
+    line-height: 1.5;
+  }
+  .quicks { padding: 0 14px 8px; border-bottom: 1px solid var(--rule); }
+  .quicks button {
+    display: block;
+    width: 100%;
+    padding: 5px 0;
+    font-size: 13px;
+    color: var(--ink-2);
+  }
+  .quicks button:hover { color: var(--ink); }
+  .agent-log { flex: 1; overflow: auto; min-height: 0; padding: 4px 14px 12px; }
+  .turn { padding: 10px 0; border-bottom: 1px solid var(--rule); }
+  .turn .who {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    color: var(--ink-3);
+  }
+  .turn p { margin-top: 4px; font-size: 13.5px; line-height: 1.6; }
+  .agent-form {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+    padding: 10px 14px 12px;
+    border-top: 1px solid var(--rule);
+  }
+  .agent-form textarea {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    border-bottom: 1px solid var(--ink);
+    background: transparent;
+    resize: none;
+    font-size: 13px;
+    line-height: 1.45;
+    padding: 4px 0;
+    height: 40px;
+    outline: none;
+  }
+  .agent-form .btn-ink { padding: 6px 10px; font-size: 14px; }
+  .agent-tab {
+    width: 100%;
+    height: 100%;
+    writing-mode: vertical-rl;
+    font-family: var(--serif);
+    font-size: 14px;
+    letter-spacing: 0.22em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .agent-tab:hover { background: var(--paper); }
+
+  .qc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    align-items: baseline;
+    padding: 9px 24px 11px;
+    border-top: 3px double var(--ink);
+    background: var(--paper);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.03em;
+  }
+  .qc-label {
+    font-family: var(--serif);
+    font-size: 14px;
+    letter-spacing: 0.12em;
+    margin-right: 4px;
+  }
+  .qc .bad { color: var(--red); }
+
+  #overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+  }
+  #overlay:not([hidden]) { display: flex; align-items: center; justify-content: center; }
+  .overlay-back { position: absolute; inset: 0; background: rgba(27, 26, 23, 0.55); }
+  .overlay-plate {
+    position: relative;
+    z-index: 1;
+    width: min(1000px, calc(100vw - 80px));
+    background: var(--paper);
+  }
+  .overlay-img { overflow: hidden; background: #14120f; }
+  .overlay-img img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; transform: scale(1.32); }
+  .overlay-plate figcaption { padding: 12px 14px 14px; }
+  .overlay-nav { display: flex; gap: 16px; margin-top: 8px; }
+  .overlay-nav button { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  @media (max-width: 1360px) {
+    :root { --rail: 124px; --pad: 22px; --chapters: 148px; --agent: 260px; --gap: 32px; }
+    .mast-title { font-size: 44px; }
+    .desk-title { font-size: 28px; }
+    .hero-cn { font-size: 30px; }
+    .form-title { font-size: 28px; }
+    .new-hero, .new-form { padding: 22px 24px 36px; }
+    .work-body { padding: 16px 18px 40px; }
+    .work-head { padding: 12px 18px; }
+    .tab { font-size: 12px; padding: 6px 10px; }
+    .chapter-head h2 { font-size: 24px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+</style>
+</head>
+<body>
+  <div id="view-gallery" class="view">
+    <aside class="rail" id="rail"></aside>
+    <div class="catalog-main" id="catalog-main">
+      <header class="mast">
+        <div class="mast-top">
+          <div class="brand"><span class="mark" aria-hidden="true"></span>视频工坊</div>
+          <div class="lib">66 种风格 · Lemo 库已连接</div>
+        </div>
+        <h1 class="mast-title">影片目录</h1>
+        <p class="mast-sub">六十六种绘制风格。选一种，写成 30–60 秒的短片。</p>
+        <hr class="rule-ink">
+      </header>
+      <section class="call" id="call"></section>
+      <div class="tools">
+        <span class="search-k">检索</span>
+        <input id="q" class="search" type="search" autocomplete="off" placeholder="中文、英文或 slug" spellcheck="false">
+        <button type="button" id="clear-q" class="clear-q" data-action="clear-search" hidden>清除</button>
+        <span class="count" id="count">66 条</span>
+        <span class="folio" id="folio">页 001 / 066</span>
+      </div>
+      <div id="gallery-root"></div>
+      <footer class="colophon" id="colophon"></footer>
+    </div>
+  </div>
+
+  <div id="view-new" class="view">
+    <header class="new-top">
+      <button type="button" data-action="back">返回目录</button>
+      <span id="new-crumb"></span>
+      <span>简报未建组</span>
+    </header>
+    <div class="new-body">
+      <div class="new-hero" id="new-hero"></div>
+      <div class="new-form" id="new-form"></div>
+    </div>
+  </div>
+
+  <div id="view-desk" class="view">
+    <header class="desk-head" id="desk-head"></header>
+    <div class="desk-body" id="desk-body">
+      <nav class="chapters" id="chapters"></nav>
+      <section class="work" id="work"></section>
+      <aside class="agent" id="agent"></aside>
+    </div>
+    <footer class="qc" id="qc"></footer>
+  </div>
+
+  <div id="overlay" hidden>
+    <div class="overlay-back" data-action="close-overlay"></div>
+    <figure class="overlay-plate">
+      <div class="overlay-img"><img id="overlay-img" alt=""></div>
+      <figcaption>
+        <div id="overlay-cap"></div>
+        <div class="overlay-nav">
+          <button type="button" data-action="overlay-prev">上一帧</button>
+          <button type="button" data-action="overlay-next">下一帧</button>
+          <button type="button" data-action="close-overlay">关闭</button>
+        </div>
+      </figcaption>
+    </figure>
+  </div>
+
+  <noscript><p style="padding:24px;font-family:serif">需要 JavaScript 才能翻开这本目录。</p></noscript>
+  <script type="application/json" id="style-data">[{"seq":"01","num":"01","slug":"crayon-book","en":"Crayon Picture Book","cn":"蜡笔儿童绘本","cat":"手绘与绘画","catEn":"Hand-drawn & Painting","line":"月亮失眠了，小女孩爬上屋顶给它唱摇篮曲。","uses":["Picture books","Bedtime stories","Kids' learning"],"dur":52,"film":"The Moon Can't Sleep"},{"seq":"02","num":"02","slug":"watercolor","en":"Watercolor Brush","cn":"水彩笔刷","cat":"手绘与绘画","catEn":"Hand-drawn & Painting","line":"跟着降雨从澳洲红色腹地一路画到绿色海岸，一镜到底。","uses":["Nature documentary","Travel","Science explainers"],"dur":113.6,"film":"Follow the Rain"},{"seq":"03","num":"03","slug":"ink-wash","en":"Chinese Ink Wash","cn":"中国水墨","cat":"手绘与绘画","catEn":"Hand-drawn & Painting","line":"侠客踏水过江，一剑断流。","uses":["Wuxia","Cultural brands","Poetry"],"dur":48,"film":"The Swordsman and the River"},{"seq":"04","num":"04","slug":"impasto","en":"Impasto Oil Painting","cn":"油画厚涂","cat":"手绘与绘画","catEn":"Hand-drawn & Painting","line":"灰色雨中广场，第一把红伞撑开，圆舞曲把整个广场刷上颜色。","uses":["Music videos","Art & culture","Emotional ads"],"dur":39.7,"film":"The Colour of Rain"},{"seq":"05","num":"05","slug":"one-line","en":"One-line Drawing","cn":"一笔画","cat":"手绘与绘画","catEn":"Hand-drawn & Painting","line":"一根不离纸的线画完一个人的一生，再把笔交给孩子。","uses":["Brand stories","Life milestones","Minimal ads"],"dur":47.5,"film":"The Line That Never Lifted"},{"seq":"06","num":"06","slug":"whiteboard","en":"Whiteboard Explainer","cn":"白板讲解","cat":"手绘与绘画","catEn":"Hand-drawn & Painting","line":"手机怎么知道你在哪：GPS、原子钟，和相对论每天多出的 38 微秒。","uses":["Explainers","Online courses","Science"],"dur":111,"film":"Einstein in Your Pocket"},{"seq":"07","num":"07","slug":"shadow-puppet","en":"Shadow Puppetry","cn":"皮影戏","cat":"东方传统","catEn":"East Asian Traditions","line":"十日炙烤大地，后羿张弓射日。","uses":["Myths & folklore","Heritage","Festivals"],"dur":54.4,"film":"Hou Yi Shoots the Suns"},{"seq":"08","num":"08","slug":"ukiyoe","en":"Ukiyo-e","cn":"浮世绘","cat":"东方传统","catEn":"East Asian Traditions","line":"旅人走向远山，每个镜头都是一幅版画；巨浪是高潮，结尾是远山与整幅画轴拉远。","uses":["Travel","Japanese culture","Poetry"],"dur":44,"film":"Toward the Mountain"},{"seq":"09","num":"09","slug":"papercut-red","en":"Red Paper-cut","cn":"红色窗花剪纸","cat":"东方传统","catEn":"East Asian Traditions","line":"除夕年兽进村，小女孩剪出的大窗花照亮全村，把它吓跑。","uses":["Lunar New Year","Festive greetings","Folk tales"],"dur":49,"film":"Nian Comes to Town"},{"seq":"10","num":"10","slug":"paper-lantern","en":"Paper-cut Lightbox","cn":"纸雕灯影","cat":"东方传统","catEn":"East Asian Traditions","line":"一枚月饼讲中秋的团圆与思念，纸雕灯箱层层透光。","uses":["Festivals","Gift brands","Cultural stories"],"dur":121.8,"film":"A Mooncake's Longing"},{"seq":"11","num":"12","slug":"risograph","en":"Risograph Print","cn":"Risograph 孔版印刷","cat":"印刷与版画","catEn":"Print & Printmaking","line":"周日早晨骑车穿过城市：面包店、公园、河边，每到一处加一版油墨，最后三版套印。","uses":["Indie brands","Zines","Lifestyle"],"dur":40,"film":"Sunday Ride"},{"seq":"12","num":"13","slug":"halftone-dossier","en":"Halftone Dossier","cn":"复古半调案卷","cat":"印刷与版画","catEn":"Print & Printmaking","line":"橘猫胖橘被立案审查：测试重力、凌晨跑酷，最后无罪释放。","uses":["Humour","Pet content","Social shorts"],"dur":30,"film":"Case File: Chubby"},{"seq":"13","num":"15","slug":"woodcut","en":"Woodcut Print","cn":"木刻版画","cat":"印刷与版画","catEn":"Print & Printmaking","line":"村子用一整个冬天铸一口钟，钟声第一次响起，雪停了。","uses":["Folk tales","Craft brands","Book trailers"],"dur":58.5,"film":"The Bell Founder"},{"seq":"14","num":"16","slug":"swiss-motion","en":"Swiss Motion Graphics","cn":"瑞士动态排版","cat":"图形与排版","catEn":"Graphic & Type","line":"一张音乐会海报按瑞士设计的五条规则自己排版，第五条是只打破一条。","uses":["Brand identity","Events","Design education"],"dur":44,"film":"Five Rules for a Poster"},{"seq":"15","num":"17","slug":"spy-titles","en":"60s Spy Title Sequence","cn":"60s 间谍片头","cat":"图形与排版","catEn":"Graphic & Type","line":"虚构 1964 年间谍片的片头：追一把被偷的钥匙，几何碎片最后拼成片名。","uses":["Title sequences","Event openers","Trailers"],"dur":44.1,"film":"The Velvet Cipher"},{"seq":"16","num":"18","slug":"art-deco","en":"Art Deco","cn":"装饰艺术","cat":"图形与排版","catEn":"Graphic & Type","line":"1930 年的大饭店，门童赶在午夜前把一封信送上顶楼。","uses":["Luxury & hospitality","Galas","Invitations"],"dur":58.4,"film":"Midnight at the Starlight Hotel"},{"seq":"17","num":"19","slug":"blueprint","en":"Blueprint","cn":"蓝图 / 工程制图","cat":"图形与排版","catEn":"Graphic & Type","line":"发明家的蓝图自己画出一台接云机器，修订云线变成了真的雨云。","uses":["Engineering","Hardware launches","Tech explainers"],"dur":46.7,"film":"Patent Pending: The Cloud Catcher"},{"seq":"18","num":"20","slug":"stained-glass","en":"Stained Glass","cn":"彩色玻璃窗","cat":"图形与排版","catEn":"Graphic & Type","line":"阳光从清晨移到黄昏，照到哪一格花窗，哪一格的故事就动起来。","uses":["Legends","Heritage","Holiday stories"],"dur":56.5,"film":"The Dragon of the East Window"},{"seq":"19","num":"21","slug":"pictogram-motion","en":"Pictogram Motion","cn":"象形运动图形","cat":"图形与排版","catEn":"Graphic & Type","line":"2026 亚运会 43 个大项，几何象形人卡着节拍快闪。","uses":["Sports events","Visual identity","Event openers"],"dur":163.6,"film":"Aichi-Nagoya 2026 — All 43 Sports"},{"seq":"20","num":"22","slug":"ascii-crt","en":"ASCII / CRT Terminal","cn":"ASCII / CRT 终端","cat":"图形与排版","catEn":"Graphic & Type","line":"月球基地的 AI 沉睡 40 年后被唤醒，用字符画出“家”来回复。","uses":["Developer tools","Sci-fi","Tech brands"],"dur":59.8,"film":"Tranquility.log"},{"seq":"21","num":"23","slug":"dataviz","en":"Data Storytelling","cn":"数据叙事","cat":"信息与发布","catEn":"Information & Keynote","line":"一百年的夏季气温，图表本身就是故事。","uses":["Data journalism","Reports","Climate & science"],"dur":50,"film":"A Hundred Summers"},{"seq":"22","num":"24","slug":"iso-infographic","en":"Isometric Infographic","cn":"等距信息图","cat":"信息与发布","catEn":"Information & Keynote","line":"一杯咖啡从种植园到你手里的旅程。","uses":["Process explainers","Supply chains","Annual reports"],"dur":58.8,"film":"From Bean to Cup"},{"seq":"23","num":"25","slug":"dark-keynote","en":"Dark Tech Keynote","cn":"暗色科技发布","cat":"信息与发布","catEn":"Information & Keynote","line":"虚构 app Tidy 的发布片：被埋掉的光标一键把几百个窗口归位。","uses":["Product launches","SaaS","Keynotes"],"dur":42,"film":"Room to Think"},{"seq":"24","num":"26","slug":"rubber-hose","en":"1930s Rubber Hose Cartoon","cn":"1930s 橡皮管卡通","cat":"卡通与动画","catEn":"Cartoon & Anime","line":"一只咖啡杯满厨房追一块逃跑的方糖。","uses":["Food & drink","Retro ads","Kids"],"dur":50,"film":"Coffee Cup Chase"},{"seq":"25","num":"27","slug":"cel-anime-80s","en":"80s Cel Anime","cn":"80 年代赛璐璐动画","cat":"卡通与动画","catEn":"Cartoon & Anime","line":"快递少女骑车穿过雨后霓虹都市，赶在黎明发射前送到一盘磁带。","uses":["Music videos","Game trailers","Nostalgia"],"dur":59,"film":"City Lights, 1987"},{"seq":"26","num":"28","slug":"scifi-toon","en":"Sci-Fi Sitcom Toon","cn":"科幻情景喜剧卡通","cat":"卡通与动画","catEn":"Cartoon & Anime","line":"厌世天才开传送门只想买杯咖啡，却穿过越来越离谱的平行宇宙。","uses":["Comedy","Tech brands","Social shorts"],"dur":57.5,"film":"Coffee Run"},{"seq":"27","num":"29","slug":"pixel-rpg","en":"16-bit Pixel RPG","cn":"16-bit 像素 RPG","cat":"游戏","catEn":"Games","line":"勇士在最终 Boss 门前存档，存档画面闪回一路冒险。","uses":["Game trailers","Recaps","Nostalgia"],"dur":54.5,"film":"The Last Save Point"},{"seq":"28","num":"31","slug":"hd-2d","en":"HD-2D","cn":"HD-2D","cat":"游戏","catEn":"Games","line":"灯塔熄灭，孙女提着最后一簇火穿过夜林、爬上风暴悬崖。","uses":["Game trailers","Fantasy","Story films"],"dur":76.5,"film":"The Lampbearer"},{"seq":"29","num":"32","slug":"microgame","en":"Microgame Frenzy","cn":"微游戏快闪","cat":"游戏","catEn":"Games","line":"见习宇航员闯五秒训练营，越来越快，Boss 关亲手降落回地球。","uses":["Game trailers","Onboarding","Social shorts"],"dur":59.8,"film":"Five-Second Astronaut"},{"seq":"30","num":"33","slug":"game-show","en":"Game Show Flat","cn":"综艺节奏扁平","cat":"游戏","catEn":"Games","line":"把 AI 发展史做成一局节奏游戏，模型踩着拍登场，最后发成绩单。","uses":["Tech timelines","Year in review","Variety shows"],"dur":148.8,"film":"Rhythm of AI, 1997 → 2026"},{"seq":"31","num":"34","slug":"silent-film","en":"1920s Silent Film","cn":"1920s 默片","cat":"电影与时代","catEn":"Cinema & Eras","line":"面包店学徒追一个滚走的面包，最后掰成两半分给饿肚子的小女孩。","uses":["Comedy","Retro brands","Silent storytelling"],"dur":54.2,"film":"The Runaway Loaf"},{"seq":"32","num":"36","slug":"backrooms","en":"Liminal Found Footage","cn":"后室 / 新怪谈","cat":"电影与时代","catEn":"Cinema & Eras","line":"新夜班员工拍下入职第一晚：无尽的黄色办公空间，和墙上的员工守则。","uses":["Horror","Mystery & ARG","Game teasers"],"dur":59.7,"film":"Night Shift Orientation"},{"seq":"33","num":"37","slug":"brick-toy","en":"Brick Toy","cn":"积木玩具","cat":"材质与 3D","catEn":"Materials & 3D","line":"积木宇航员用零件拼出火箭，飞向积木月亮。","uses":["Toys & kids","Product builds","Space"],"dur":54,"film":"Rocket from Spare Parts"},{"seq":"34","num":"41","slug":"paper-popup","en":"Paper Pop-up Book","cn":"纸片立体书","cat":"材质与 3D","catEn":"Materials & 3D","line":"立体书在书桌上打开，小精灵 Pip 在纸片世界冒险，最后跳出书外。","uses":["Children's books","Game trailers","Story films"],"dur":133,"film":"Pip's Paper Adventure"},{"seq":"35","num":"42","slug":"tilt-shift","en":"Tilt-Shift Miniature","cn":"移轴微缩","cat":"材质与 3D","catEn":"Materials & 3D","line":"玩具城的早高峰，一切都像模型。","uses":["City promos","Real estate","Transport"],"dur":38,"film":"Toy Town Rush Hour"},{"seq":"36","num":"43","slug":"lowpoly-island","en":"Low-poly Isometric Island","cn":"低多边形等距","cat":"材质与 3D","catEn":"Materials & 3D","line":"空海里一格格长出小岛和村庄，每放一块响一个音符，直到星空。","uses":["Game trailers","World building","Calm content"],"dur":53,"film":"The Island That Grew"},{"seq":"37","num":"44","slug":"glass-product","en":"Glass Product Render","cn":"玻璃质感产品","cat":"材质与 3D","catEn":"Materials & 3D","line":"虚构玻璃耳机 Aura 的开箱与特写。","uses":["Product launches","Consumer tech","Beauty"],"dur":32,"film":"Aura — Hear the Light"},{"seq":"38","num":"45","slug":"urban-sketch","en":"Urban Sketch · Pen & Wash","cn":"钢笔淡彩","cat":"手绘与绘画","catEn":"Hand-drawn & Painting","line":"公园只是一张钢笔速写，风把草帽吹到哪里，哪里才有颜色。","uses":["City & travel","Architecture","Lifestyle brands"],"dur":32.4,"film":"Where the Wind Went"},{"seq":"39","num":"46","slug":"living-screencast","en":"Living Screencast","cn":"活体实机录屏","cat":"信息与发布","catEn":"Information & Keynote","line":"像素小人 Clawd 搬进 Claude 应用，一镜到底演示 Plan 模式和自检。","uses":["Product tutorials","Feature launches","Onboarding"],"dur":59.4,"film":"Clawd Moves In"},{"seq":"40","num":"48","slug":"midcentury-toon","en":"Mid-century Cartoon","cn":"50s 扁平卡通","cat":"卡通与动画","catEn":"Cartoon & Anime","line":"用 50 年代教育片的口吻，三步教你装好一台扫地机。","uses":["Set-up guides","Help centres","How-to"],"dur":40,"film":"Meet Pip"},{"seq":"41","num":"52","slug":"hologram-hud","en":"Sci-fi Hologram HUD","cn":"科幻全息界面","cat":"信息与发布","catEn":"Information & Keynote","line":"电助力车被扫描成全息线框，目标框依次锁定电池、电机、刹车。","uses":["Spec walkthroughs","Launch videos","Trade shows"],"dur":39,"film":"Volt · Spec Scan"},{"seq":"42","num":"53","slug":"engraving","en":"Copperplate Engraving","cn":"铜版画","cat":"印刷与版画","catEn":"Print & Printmaking","line":"一张博物志图版自己刻出来：雕刀推开铜版，蜜蜂一线线成形，最后手工水彩上色。","uses":["Museum labels","Science explainers","Brand heritage"],"dur":40,"film":"The Honeybee, Plate VII"},{"seq":"43","num":"54","slug":"silkscreen-poster","en":"Silkscreen Travel Poster","cn":"丝印旅行海报","cat":"印刷与版画","catEn":"Print & Printmaking","line":"三条步道各一张丝印海报，一色一刮印出来，再沿山脊一镜到底从正午爬到黄昏。","uses":["Destination guides","Tourism","Event posters"],"dur":38.4,"film":"Three Trails"},{"seq":"44","num":"55","slug":"satellite-briefing","en":"Satellite Briefing","cn":"卫星简报","cat":"实证影像","catEn":"Evidence Films","line":"卫星照着地图去找咸海，找到的是沙漠；只有筑了坝的那一块回来了。","uses":["Climate","News explainers","Geography"],"dur":37.8,"film":"The Map Still Says Sea"},{"seq":"45","num":"56","slug":"briefing-board","en":"Engineering Briefing Board","cn":"工程简报板","cat":"实证影像","catEn":"Evidence Films","line":"一条河要架桥，四种桥型在一面简报墙上逐个受检，拍板的是桥下要过的船。","uses":["Engineering","Option comparisons","Briefings"],"dur":40,"film":"The Ship Decides"},{"seq":"46","num":"57","slug":"lidar-survey","en":"LiDAR Survey","cn":"点云测绘","cat":"实证影像","catEn":"Evidence Films","line":"激光点云剥掉一片森林的树冠，露出当年农田的石墙：3.4 公里。","uses":["Heritage","Environment","Site surveys"],"dur":40,"film":"The Fields Under the Forest"},{"seq":"47","num":"58","slug":"white-model","en":"Projection on White Model","cn":"白模投影","cat":"实证影像","catEn":"Evidence Films","line":"投影机把数据一层层刷上鹿特丹白模：从 1940 年的空洞到今天的塔楼。","uses":["Urban planning","Exhibitions","City data"],"dur":40,"film":"How a Flattened City Grew Back"},{"seq":"48","num":"59","slug":"data-physical","en":"Data Physicalization","cn":"数据实物化","cat":"实证影像","catEn":"Evidence Films","line":"十二年风电和太阳能装机叠成实物，绕表盘升成两条螺旋，2021 年太阳能反超。","uses":["Annual reports","Investor decks","Energy data"],"dur":39.4,"film":"Two Spirals"},{"seq":"49","num":"60","slug":"teardown","en":"Exploded Teardown","cn":"产品拆解","cat":"实证影像","catEn":"Evidence Films","line":"开源键盘的一半在一次环绕中逐层拆开，看到主控再合拢，标上真实尺寸。","uses":["Hardware launches","Product pages","Spec explainers"],"dur":38.8,"film":"21 Keys, Opened"},{"seq":"50","num":"61","slug":"microscope","en":"Microscope Story","cn":"显微叙事","cat":"实证影像","catEn":"Evidence Films","line":"一镜从肝组织玻片推到单个细胞核，两个圆逐像素数出 2.4 倍的蓝。","uses":["Biomedicine","Materials science","Skincare science"],"dur":39.5,"film":"Measured Blue"},{"seq":"51","num":"62","slug":"archive-lighttable","en":"Archive Light Table","cn":"档案灯台","cat":"实证影像","catEn":"Evidence Films","line":"电报说最长飞了 57 秒；放大镜下，莱特兄弟的底片和档案说是 59 秒。","uses":["Brand history","Archive stories","Museums"],"dur":40,"film":"Two Seconds Short"},{"seq":"52","num":"63","slug":"caption-news","en":"Caption News","cn":"字幕新闻","cat":"剪辑与纪实","catEn":"Edit & Documentary","line":"美国一年死掉 130 万箱蜜蜂，总数却涨了 6%：静音也能看懂的新闻。","uses":["Social news","Report explainers","Data shorts"],"dur":59.5,"film":"The Bee Ledger"},{"seq":"53","num":"64","slug":"newsreel","en":"1920s Newsreel","cn":"1920s 新闻影片","cat":"剪辑与纪实","catEn":"Edit & Documentary","line":"1926 年报纸说查尔斯顿会跳坏膝盖，福特工人野餐会上的孩子照跳不误。","uses":["History stories","Fads & eras","Anniversaries"],"dur":54.6,"film":"Knock-Knee Alert"},{"seq":"54","num":"65","slug":"countdown","en":"Live Countdown Split-screen","cn":"实时倒计时分屏","cat":"剪辑与纪实","catEn":"Edit & Documentary","line":"阿尔忒弥斯二号发射的最后一分钟，一秒不剪：格子从 1 开到 9，点火合成 1。","uses":["Launches","Countdowns","Live events"],"dur":59.5,"film":"Counting Itself Down"},{"seq":"55","num":"66","slug":"city-symphony","en":"Time-lapse Symphony","cn":"延时交响","cat":"剪辑与纪实","catEn":"Edit & Documentary","line":"纽约的一天：延时光河、踩着十六分音符的网格，1899 年和今天并排。","uses":["City films","Music montages","Openers"],"dur":52,"film":"One Day in New York"},{"seq":"56","num":"67","slug":"visual-investigation","en":"Visual Investigation","cn":"视觉调查","cat":"剪辑与纪实","catEn":"Edit & Documentary","line":"新闻片、照片、证词和调查报告排上同一条时间轴，五路来源指向一处。","uses":["Reconstructions","Fact-checks","Incident reports"],"dur":60,"film":"The Hindenburg: Four Minutes, 32 Seconds"},{"seq":"57","num":"68","slug":"kino-montage","en":"Constructivist Montage","cn":"构成主义蒙太奇","cat":"剪辑与纪实","catEn":"Edit & Documentary","line":"帝国大厦的小册子写着建造者，工地实拍和老照片给出答案：每天 2,500 人。","uses":["Industry histories","Milestones","Collective effort"],"dur":60,"film":"410 Days"},{"seq":"58","num":"69","slug":"telestrator","en":"Sports Telestrator","cn":"体育战术板","cat":"剪辑与纪实","catEn":"Edit & Documentary","line":"半场 0–3，费内巴切 12 分钟连进三球：冻住画面、画线、分屏、射门图。","uses":["Sports analysis","Match recaps","Coaching"],"dur":54.4,"film":"Freeze Frame"},{"seq":"59","num":"70","slug":"news-package","en":"Broadcast News Package","cn":"电视新闻包装","cat":"剪辑与纪实","catEn":"Edit & Documentary","line":"一周四条 AI 新闻，一整套电视台包装：串联单、标题条、翻牌价格表、规格卡。","uses":["News round-ups","Bulletins","Market updates"],"dur":53.5,"film":"The Week in AI"},{"seq":"60","num":"71","slug":"memphis-diorama","en":"Memphis Diorama","cn":"孟菲斯微缩景观","cat":"材质与 3D","catEn":"Materials & 3D","line":"一个河湾一镜过完四季，大树一蹲一弹，就换一季。","uses":["Web heroes","Ambient loops","Seasons"],"dur":45,"film":"Four Seasons in Pomelo Town"},{"seq":"61","num":"72","slug":"transit-map","en":"Transit Map","cn":"地铁线路图","cat":"信息与发布","catEn":"Information & Keynote","line":"一张纸上的线路图，从 1993 年的 6 公里长到 21 条线、906 公里。","uses":["Transport","Growth over time","Networks"],"dur":47,"film":"6 Kilometres"},{"seq":"62","num":"73","slug":"chalkboard","en":"Chalkboard","cn":"黑板粉笔","cat":"手绘与绘画","catEn":"Hand-drawn & Painting","line":"粉笔写下网上的说法，再一擦，把「射」写回三千年前。","uses":["Word origins","Myth-busting","Lessons"],"dur":49.3,"film":"The Story of Chinese Characters"},{"seq":"63","num":"74","slug":"isometric-picture-book","en":"Isometric Picture Book","cn":"等距绘本","cat":"信息与发布","catEn":"Information & Keynote","line":"等距的登机口和机舱里，小人按顺序登机，讲清哪种叫法快将近一半。","uses":["Everyday rules","Queues","Comparisons"],"dur":59.8,"film":"Seventy-Two Seats"},{"seq":"64","num":"75","slug":"printed-long-take","en":"Printed Long Take","cn":"印刷长镜头","cat":"印刷与版画","catEn":"Print & Printmaking","line":"刮版画的北海道河谷一镜到底，丹顶鹤从 33 只数回到 1,927 只。","uses":["Journeys","Wildlife","Landscapes"],"dur":60,"film":"Thirty-Three Cranes"},{"seq":"65","num":"76","slug":"circuit-board","en":"Circuit Board","cn":"电路板","cat":"信息与发布","catEn":"Information & Keynote","line":"江河变成电路板上的走线，电流从水坝跑 2,080 公里进手机充电器。","uses":["Energy","Supply chains","Devices"],"dur":60,"film":"Seven Milliseconds"},{"seq":"66","num":"77","slug":"desktop-flythrough","en":"Desktop Flythrough","cn":"桌面穿梭","cat":"材质与 3D","catEn":"Materials & 3D","line":"一张猫照片跳过桌上的应用卡片，从一台手机飞到朋友手机里，一镜跟到底。","uses":["App explainers","Workflows","Products"],"dur":60,"film":"Before the Ding"}]</script>
+  <script>
+const STYLES = JSON.parse(document.getElementById("style-data").textContent);
+const bySlug = Object.fromEntries(STYLES.map((s) => [s.slug, s]));
+const CAT_ORDER = [
+  ["手绘与绘画", "Hand-drawn & Painting"],
+  ["东方传统", "East Asian Traditions"],
+  ["印刷与版画", "Print & Printmaking"],
+  ["图形与排版", "Graphic & Type"],
+  ["信息与发布", "Information & Keynote"],
+  ["卡通与动画", "Cartoon & Anime"],
+  ["游戏", "Games"],
+  ["电影与时代", "Cinema & Eras"],
+  ["材质与 3D", "Materials & 3D"],
+  ["实证影像", "Evidence Films"],
+  ["剪辑与纪实", "Edit & Documentary"],
+];
+const STAGES = [
+  ["brief", "简报"],
+  ["treatment", "Treatment"],
+  ["frames", "风格帧"],
+  ["board", "分镜"],
+  ["sound", "声音"],
+  ["delivery", "成片"],
+];
+const STAGE_NAME = Object.fromEntries(STAGES);
+const QUICK = [
+  ["treatment", "写 Treatment"],
+  ["frames", "按 STYLE.md 做 3 张风格帧"],
+  ["grey", "这一帧太灰，改"],
+  ["board", "按分镜表接时间轴"],
+  ["subs", "检查字幕停留"],
+  ["render", "渲染草稿"],
+];
+const CROPS = ["22% 78%", "74% 30%", "40% 16%"];
+const GREY_REPLY = "第 2 帧的问题在纸白被水彩罩染吃掉了。我把远山的罩染降一档、浪尖留白提回来，再抽 3 张。时间轴不动。";
+const OPEN_REPLY = "现在是从全景推入。改成先给一个退潮后的湿沙特写，第二秒才拉开。改的是 film.js 的镜头表，不动风格。";
+
+const state = {
+  cat: "全部",
+  q: "",
+  styleSlug: "watercolor",
+  projectId: "tide",
+  agentOpen: true,
+  agentDraft: "",
+  nid: 1,
+  order: ["tide", "neighbor"],
+  overlay: null,
+  pulling: null,
+  rendering: null,
+  live: "",
+  liveHot: false,
+  playing: false,
+  playFrame: 0,
+  playTimer: null,
+  galleryScroll: 0,
+  draft: { idea: "", lang: "中文", dur: 45, voice: true, board: false, advanced: false, error: "" },
+};
+const projects = {};
+
+function esc(s) {
+  return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+function pad(n) { return String(n).padStart(2, "0"); }
+function fmtDur(sec) {
+  const s = Math.round(Number(sec));
+  return pad(Math.floor(s / 60)) + ":" + pad(s % 60);
+}
+function tcStamp(mmss) {
+  const [m, s] = String(mmss).split(":").map(Number);
+  return "00:" + pad(m) + ":" + pad(s) + ":00";
+}
+function tcFrames(frames) {
+  const f = Math.max(0, Math.floor(frames));
+  const ff = f % 24;
+  const s = Math.floor(f / 24);
+  return pad(Math.floor(s / 3600)) + ":" + pad(Math.floor(s / 60) % 60) + ":" + pad(s % 60) + ":" + pad(ff);
+}
+function poster(style) { return "../../assets/posters/" + style.slug + ".jpg"; }
+function filmPath(p) { return "~/films/" + p.title.replace(/[\\/]/g, ""); }
+function current() { return projects[state.projectId] || null; }
+function showingDesk(id) {
+  return state.projectId === id && document.getElementById("view-desk").classList.contains("on");
+}
+function styleOf(p) { return bySlug[p.slug]; }
+function catEn(cn) {
+  const row = CAT_ORDER.find((c) => c[0] === cn);
+  return row ? row[1] : "";
+}
+
+projects.tide = {
+  id: "tide",
+  title: "潮水退去之前",
+  slug: "watercolor",
+  dur: 45,
+  lang: "中文",
+  voice: true,
+  board: false,
+  idea: "退潮前的最后一刻。海面还在，远山被罩染吃了一层。一个人站在湿沙上，等水走完。",
+  stage: "frames",
+  done: ["brief", "treatment"],
+  skip: ["board"],
+  treatmentReady: true,
+  renderTime: null,
+  frames: [
+    { t: "00:08", name: "湿沙", crop: CROPS[0], flag: "", note: "钩子。水线还在。", pulled: false },
+    { t: "00:22", name: "海面", crop: CROPS[1], flag: "grey", note: "纸白被水彩罩染吃掉。远山降一档，浪尖留白。", pulled: false },
+    { t: "00:36", name: "远山", crop: CROPS[2], flag: "", note: "留白还在。等第 2 帧改完再看关系。", pulled: false },
+  ],
+  versions: [],
+  lines: [
+    ["00:02", "潮水还没走完。", "2.4s"],
+    ["00:08", "湿沙上留下最后一道线。", "2.8s"],
+    ["00:16", "海面要有层次。", "3.1s"],
+    ["00:24", "远山别被罩染吃掉。", "2.2s"],
+    ["00:32", "浪尖留白。", "2.6s"],
+    ["00:40", "水走了，人还在。", "2.4s"],
+  ],
+  messages: [
+    { who: "你", text: "第二张太灰了，海面看不出层次。" },
+    { who: "导演", text: GREY_REPLY },
+    { who: "你", text: "开头三秒不够抓人。" },
+    { who: "导演", text: OPEN_REPLY },
+  ],
+};
+projects.neighbor = {
+  id: "neighbor",
+  title: "墙里的邻居",
+  slug: "crayon-book",
+  dur: 45,
+  lang: "中文",
+  voice: true,
+  board: false,
+  idea: "墙这边的小孩每晚听见墙那边有人在画画。一天，墙上出现了一个蜡笔洞。",
+  stage: "delivery",
+  done: ["brief", "treatment", "frames", "board", "sound", "delivery"],
+  skip: [],
+  treatmentReady: true,
+  renderTime: "2 分 18 秒",
+  frames: [
+    { t: "00:06", name: "墙", crop: CROPS[0], flag: "", note: "蜡笔颗粒在，不再加。", pulled: true },
+    { t: "00:22", name: "洞", crop: CROPS[1], flag: "", note: "先给洞，不要先解释。", pulled: true },
+    { t: "00:38", name: "递笔", crop: CROPS[2], flag: "", note: "", pulled: true },
+  ],
+  versions: [
+    { id: "v3", kind: "交付", lufs: "−14.1", dur: "00:45", current: true },
+    { id: "v2", kind: "成片", lufs: "−15.4", dur: "00:45", current: false },
+    { id: "v1", kind: "草稿", lufs: "—", dur: "00:41", current: false },
+  ],
+  lines: [
+    ["00:03", "墙那边又在画画。", "2.6s"],
+    ["00:10", "蜡笔的声音，一下一下。", "2.8s"],
+    ["00:18", "今晚墙上多了一个洞。", "3.0s"],
+    ["00:26", "洞的那边有光。", "2.4s"],
+    ["00:34", "邻居把一支蜡笔递过来。", "3.2s"],
+    ["00:41", "两个人画同一面墙。", "2.6s"],
+  ],
+  messages: [
+    { who: "导演", text: "交付版在 v3。−14.1 LUFS，readcheck 6 条都过，没有黑帧。这一版可以交。" },
+  ],
+};
+
+function filtered() {
+  const q = state.q.trim().toLowerCase();
+  return STYLES.filter((s) => {
+    if (state.cat !== "全部" && s.cat !== state.cat) return false;
+    if (!q) return true;
+    return [s.cn, s.en, s.slug, s.line, s.film, s.cat, s.seq, s.num, s.catEn].join("\n").toLowerCase().includes(q);
+  });
+}
+function go(hash) {
+  if ((location.hash || "#/") === hash) return;
+  location.hash = hash;
+}
+function show(name) {
+  document.querySelectorAll(".view").forEach((v) => v.classList.remove("on"));
+  document.getElementById("view-" + name).classList.add("on");
+  const titles = { gallery: "影片目录 · 视频工坊", new: "新建简报 · 视频工坊", desk: "制作台 · 视频工坊" };
+  document.title = titles[name] || "视频工坊";
+}
+function route() {
+  const h = decodeURIComponent(location.hash || "#/");
+  stopPlay();
+  closeOverlay(true);
+  if (h.startsWith("#/new/")) {
+    const slug = h.slice(6);
+    if (!bySlug[slug]) return go("#/");
+    state.styleSlug = slug;
+    show("new");
+    renderNew();
+    return;
+  }
+  if (h.startsWith("#/desk/")) {
+    const id = h.slice(7);
+    if (!projects[id]) return go("#/");
+    state.projectId = id;
+    show("desk");
+    renderDesk({ scrollAgent: true });
+    return;
+  }
+  show("gallery");
+  renderCall();
+  renderPlates();
+  const main = document.getElementById("catalog-main");
+  main.scrollTop = state.galleryScroll || 0;
+}
+
+function renderRail() {
+  const counts = {};
+  STYLES.forEach((s) => { counts[s.cat] = (counts[s.cat] || 0) + 1; });
+  const tabs = [["全部", "All", STYLES.length]].concat(CAT_ORDER.map(([cn, en]) => [cn, en, counts[cn] || 0]));
+  document.getElementById("rail").innerHTML =
+    '<div class="rail-head"><div class="brand"><span class="mark" aria-hidden="true"></span>视频工坊</div><strong>目录</strong><p class="kicker" style="margin-top:6px">VOL. 01</p></div>' +
+    '<nav class="tabs">' + tabs.map(([cn, , n]) =>
+      '<button type="button" class="tab" data-action="set-cat" data-cat="' + esc(cn) + '" aria-current="' + (state.cat === cn ? "true" : "false") + '"><span>' + esc(cn) + '</span><span class="n">' + pad(n) + "</span></button>"
+    ).join("") + "</nav>" +
+    '<div class="rail-foot">66 种风格<br>Lemo 库已连接</div>';
+}
+function paintRail() {
+  document.querySelectorAll(".tab").forEach((t) => {
+    t.setAttribute("aria-current", t.dataset.cat === state.cat ? "true" : "false");
+  });
+}
+function rowStatus(p) {
+  if (p.versions.some((v) => v.kind === "交付")) return { text: "已交付 · −14.1 LUFS", bad: false };
+  const bad = p.frames.find((f) => f.flag === "grey" || f.flag === "review");
+  if (bad) {
+    const n = p.frames.indexOf(bad) + 1;
+    return { text: bad.flag === "grey" ? "风格帧 · 第 " + n + " 帧偏灰待改" : "风格帧 · 第 " + n + " 帧待看", bad: true };
+  }
+  if (p.versions.length) {
+    const cur = p.versions.find((v) => v.current) || p.versions[0];
+    return { text: "成片 · " + cur.kind, bad: cur.kind === "草稿" };
+  }
+  return { text: STAGE_NAME[p.stage] || "", bad: false };
+}
+function callRow(p) {
+  const style = styleOf(p);
+  const st = rowStatus(p);
+  return '<button type="button" class="call-row" data-action="open-project" data-id="' + p.id + '">' +
+    '<span class="ttl">《' + esc(p.title) + "》</span>" +
+    '<span>' + esc(style.cn) + "</span>" +
+    '<span class="dur">' + fmtDur(p.dur) + "</span>" +
+    '<span class="st' + (st.bad ? " bad" : "") + '">' + esc(st.text) + "</span>" +
+    '<span class="go">打开</span></button>';
+}
+function renderCall() {
+  const list = state.order.map((id) => projects[id]);
+  const live = list.filter((p) => !p.versions.some((v) => v.kind === "交付"));
+  const done = list.filter((p) => p.versions.some((v) => v.kind === "交付"));
+  const cols = '<div class="call-cols"><span>片名</span><span>风格</span><span>时长</span><span>状态</span><span></span></div>';
+  document.getElementById("call").innerHTML =
+    "<h2>进行中的影片</h2>" + cols + live.map(callRow).join("") +
+    (done.length ? "<h2>已交付</h2>" + done.map(callRow).join("") : "");
+}
+function renderPlates() {
+  const list = filtered();
+  const root = document.getElementById("gallery-root");
+  document.getElementById("count").textContent = list.length + " 条";
+  document.getElementById("clear-q").hidden = !state.q.trim();
+  if (!list.length) {
+    root.innerHTML = '<div class="empty"><p>目录里没有「' + esc(state.q.trim()) + "」。</p>" +
+      '<button type="button" class="btn-text" data-action="clear-search">清除检索</button></div>';
+    document.getElementById("colophon").hidden = true;
+    document.getElementById("folio").textContent = "页 — / 066";
+    return;
+  }
+  const head = state.cat !== "全部"
+    ? '<header class="chapter-head"><h2>' + esc(state.cat) + '</h2><span class="en">' + esc(catEn(state.cat)) + '</span><span class="count">' + pad(list.length) + "</span></header>"
+    : "";
+  root.innerHTML = head + '<div class="plates">' + list.map((s, i) => {
+    const eager = i < 4 ? 'loading="eager"' : 'loading="lazy"';
+    return '<button type="button" class="plate" data-action="open-style" data-slug="' + s.slug + '" data-seq="' + s.seq + '" data-cat="' + esc(s.cat) + '">' +
+      '<div class="plate-img"><img src="' + poster(s) + '" alt="' + esc(s.cn) + '" width="1280" height="720" ' + eager + ">" +
+      '<span class="hover-meta">' + esc(s.uses.join(" · ")) + "</span></div>" +
+      '<div class="plate-cap"><span class="plate-num">' + s.seq + '</span>' +
+      '<span class="plate-cn">' + esc(s.cn) + '</span>' +
+      '<span class="plate-en">' + esc(s.en) + '</span>' +
+      '<span class="plate-line">' + esc(s.line) + '</span>' +
+      '<span class="plate-foot"><span>' + esc(s.cat) + "</span><span>" + fmtDur(s.dur) + "</span></span></div></button>";
+  }).join("") + "</div>";
+  const colo = document.getElementById("colophon");
+  colo.hidden = false;
+  colo.innerHTML = state.cat === "全部" && !state.q.trim()
+    ? '<p class="end">终</p><p>六十六种风格 · Lemo 库 · 影片目录 Vol. 01</p>'
+    : "<p>" + esc(state.cat === "全部" ? "检索" : state.cat) + " · " + list.length + " 种</p>";
+  updateFolio();
+}
+function updateFolio() {
+  const main = document.getElementById("catalog-main");
+  const plates = [...main.querySelectorAll(".plate")];
+  const folio = document.getElementById("folio");
+  if (!plates.length || !folio) return;
+  const edge = main.getBoundingClientRect().top + 72;
+  let cur = plates[0];
+  for (const p of plates) {
+    if (p.getBoundingClientRect().top < edge) cur = p;
+  }
+  folio.textContent = "页 " + cur.dataset.seq + " / 066 · " + cur.dataset.cat;
+}
+
+function renderNew() {
+  const s = bySlug[state.styleSlug];
+  document.getElementById("new-crumb").textContent = "新建 · " + s.cat + " · " + s.cn;
+  document.getElementById("new-hero").innerHTML =
+    '<div class="hero-img"><img src="' + poster(s) + '" alt="' + esc(s.cn) + '"></div>' +
+    '<div class="hero-num">' + s.seq + "</div>" +
+    '<h2 class="hero-cn">' + esc(s.cn) + "</h2>" +
+    '<p class="hero-en">' + esc(s.en) + "</p>" +
+    '<p class="hero-line">' + esc(s.line) + "</p>" +
+    '<dl class="specs">' +
+    spec("适合", s.uses.join(" · ")) +
+    spec("样本", s.film) +
+    spec("参考片长", fmtDur(s.dur)) +
+    spec("文件", s.slug + " · 库号 " + s.num) +
+    "</dl>";
+  renderForm();
+}
+function spec(k, v) {
+  return "<div><dt>" + k + "</dt><dd>" + esc(v) + "</dd></div>";
+}
+function choices(field, options) {
+  return options.map(([val, label]) => {
+    const on = String(state.draft[field]) === String(val);
+    return '<button type="button" class="choice" data-action="set-choice" data-field="' + field + '" data-value="' + val + '" aria-pressed="' + on + '">' + label + "</button>";
+  }).join("");
+}
+function renderForm() {
+  const d = state.draft;
+  document.getElementById("new-form").innerHTML =
+    '<h2 class="form-title">简报</h2>' +
+    '<p class="form-lead">交给导演之前，只写四件事。</p>' +
+    '<div class="idea-label"><span>想法</span><span class="eg">例如：退潮前的最后一刻。一个人站在湿沙上，等水走完。</span></div>' +
+    '<textarea id="idea" class="idea" spellcheck="true">' + esc(d.idea) + "</textarea>" +
+    '<div class="field" style="margin-top:18px"><span class="label">语言</span><span>' + choices("lang", [["中文", "中文"], ["English", "English"]]) + "</span></div>" +
+    '<div class="field stack"><span class="label">时长</span><span>' + choices("dur", [[30, "30 秒"], [45, "45 秒"], [60, "60 秒"]]) +
+    '<span class="hint">工坊这一支只排 30、45 或 60 秒。样本片可以更长。</span></span></div>' +
+    '<div class="field"><span class="label">配音</span><span>' + choices("voice", [["true", "要"], ["false", "不要"]]) + "</span></div>" +
+    '<button type="button" class="disclose" data-action="toggle-advanced" aria-expanded="' + (d.advanced ? "true" : "false") + '">高级 · 先看分镜</button>' +
+    (d.advanced ? '<div class="advanced"><p class="hint" style="margin-bottom:8px">要的话，Treatment 之后先出 6–9 张关键帧，你点头才做风格帧。</p>' +
+      choices("board", [["false", "不要"], ["true", "要，先看分镜"]]) + "</div>" : "") +
+    (d.error ? '<p class="form-error">' + esc(d.error) + "</p>" : "") +
+    '<div class="actions"><button type="button" class="btn-ink" data-action="create">建组，交给导演</button>' +
+    '<button type="button" class="btn-text" data-action="back">换一个风格</button></div>' +
+    '<p class="form-next">建组会写下 BRIEF.md 和 project.json，然后导演开始写 Treatment。不画画面。</p>';
+}
+
+function titleFromIdea(idea) {
+  const cut = idea.split(/[。！？!?；;\n]/)[0].trim();
+  const t = cut || "未命名";
+  return t.length > 16 ? t.slice(0, 16) : t;
+}
+function firstAction(p, style) {
+  const voice = p.voice ? "有配音" : "不配音，字幕也不烧";
+  const board = p.board ? "你要先看分镜，Treatment 之后抽 contact sheet，点头才往下。" : "不要先看分镜，Treatment 之后直接做风格帧。";
+  return "简报收到。" + p.title + "，" + style.cn + "，" + p.dur + " 秒，" + p.lang + "，" + voice + "。" + board + "我现在写 TREATMENT.md：三个结构，选一个，再排镜头表。风格按 STYLE.md，不动调色。";
+}
+function armTreatment(p) {
+  if (p.treatmentReady || p._armed) return;
+  p._armed = true;
+  setTimeout(() => {
+    p.treatmentReady = true;
+    if (!p.done.includes("treatment")) p.done.push("treatment");
+    addTurn(p, "导演", "Treatment 写好了。三个结构里我选 B：先给一个看得清的特写，第二秒再拉开。你看镜头表。");
+    if (showingDesk(p.id)) {
+      renderChapters();
+      if (p.stage === "treatment") renderWork();
+      renderAgent(true);
+    }
+  }, 1100);
+}
+function createProject() {
+  const idea = state.draft.idea.trim();
+  if (idea.length < 2) {
+    state.draft.error = "先写这一支要讲什么。";
+    renderForm();
+    return;
+  }
+  state.draft.error = "";
+  const style = bySlug[state.styleSlug];
+  const id = "p" + (++state.nid);
+  const p = {
+    id,
+    title: titleFromIdea(idea),
+    slug: style.slug,
+    dur: state.draft.dur,
+    lang: state.draft.lang,
+    voice: state.draft.voice,
+    board: state.draft.board,
+    idea,
+    stage: "treatment",
+    done: ["brief"],
+    skip: state.draft.board ? [] : ["board"],
+    frames: [],
+    versions: [],
+    lines: null,
+    messages: [],
+    treatmentReady: false,
+    renderTime: null,
+  };
+  p.messages.push({ who: "导演", text: firstAction(p, style) });
+  projects[id] = p;
+  state.order.unshift(id);
+  state.draft.idea = "";
+  armTreatment(p);
+  go("#/desk/" + id);
+}
+
+function chapterMark(p, id) {
+  if (p.done.includes(id)) return "完";
+  if (p.skip.includes(id)) return "跳过";
+  if (p.stage === id) return "正在";
+  return "";
+}
+function renderHead() {
+  const p = current();
+  const style = styleOf(p);
+  const voice = p.voice ? "有配音" : "无配音";
+  const rendering = state.rendering && state.rendering.id === p.id;
+  document.getElementById("desk-head").innerHTML =
+    '<div><p class="desk-path" id="desk-path"><span class="mark" aria-hidden="true"></span>' + esc(filmPath(p)) + "</p>" +
+    '<h1 class="desk-title" id="desk-title" contenteditable="true" spellcheck="false">' + esc(p.title) + "</h1>" +
+    '<p class="desk-meta">' + esc(style.cn) + " · " + esc(style.en) + " · " + fmtDur(p.dur) + " · " + esc(p.lang) + " · " + voice + "</p></div>" +
+    '<div class="desk-side"><p class="kicker">阶段 ' + pad(STAGES.findIndex((s) => s[0] === p.stage) + 1) + " " + esc(STAGE_NAME[p.stage]) + "</p>" +
+    '<div class="desk-actions"><button type="button" class="btn-ghost" data-action="finder">在 Finder 中显示</button>' +
+    '<button type="button" class="btn-ink" data-action="render" ' + (rendering ? "disabled" : "") + ">" + (rendering ? "渲染中" : "新渲染") + "</button></div>" +
+    '<p id="live" class="' + (state.liveHot ? "hot" : "") + '">' + esc(state.live) + "</p></div>";
+}
+function paintLive() {
+  const el = document.getElementById("live");
+  if (!el) return;
+  el.textContent = state.live;
+  el.classList.toggle("hot", state.liveHot);
+  const btn = document.querySelector('[data-action="render"]');
+  if (btn) {
+    const on = state.rendering && state.rendering.id === state.projectId;
+    btn.textContent = on ? "渲染中" : "新渲染";
+    btn.disabled = !!on;
+  }
+}
+function renderChapters() {
+  const p = current();
+  document.getElementById("chapters").innerHTML = '<p class="rail-label">章节</p>' + STAGES.map(([id, name], i) => {
+    const mark = chapterMark(p, id);
+    const cur = p.stage === id;
+    const todo = mark === "正在";
+    const future = mark === "";
+    return '<button type="button" class="ch' + (todo ? " todo" : "") + (future ? " future" : "") + '" data-action="set-stage" data-stage="' + id + '" aria-current="' + (cur ? "true" : "false") + '">' +
+      '<span class="num">' + pad(i + 1) + '</span><span class="name">' + esc(name) + '</span><span class="ch-mark">' + mark + "</span></button>";
+  }).join("");
+}
+function renderQC() {
+  const p = current();
+  if (!p) return;
+  const bad = p.frames.find((f) => f.flag === "grey" || f.flag === "review");
+  const rendered = p.versions.length > 0;
+  const items = [];
+  items.push(["READCHECK", p.lines && p.lines.length ? "通过 · " + p.lines.length + " 条字幕" : "待成片", false]);
+  items.push(["LOUDNESS", rendered ? "−14.1 LUFS" : "—", false]);
+  items.push(["TIMEBASE", fmtDur(p.dur) + " / 24fps", false]);
+  items.push(["RENDER", rendered ? (p.renderTime || "2 分 18 秒") : "—", false]);
+  items.push(["BLACK", rendered ? "无黑帧" : "未检", false]);
+  if (bad) {
+    const n = p.frames.indexOf(bad) + 1;
+    items.push(["FRAME " + pad(n), bad.flag === "grey" ? "偏灰 · 待改" : "已重抽 · 待看", true]);
+  }
+  document.getElementById("qc").innerHTML = '<span class="qc-label">质检</span>' + items.map(([k, v, hot]) =>
+    '<span class="' + (hot ? "bad" : "") + '">' + k + " " + esc(v) + "</span>"
+  ).join("");
+}
+function ctxText(p) {
+  const style = styleOf(p);
+  return p.title + " · " + style.cn + " · " + pad(STAGES.findIndex((s) => s[0] === p.stage) + 1) + " " + STAGE_NAME[p.stage];
+}
+function turnHTML(who, text) {
+  return '<div class="turn"><div class="who">' + esc(who) + "</div><p>" + esc(text) + "</p></div>";
+}
+function addTurn(p, who, text) {
+  const recent = p.messages.slice(-6);
+  if (recent.some((m) => m.who === who && m.text === text)) return false;
+  p.messages.push({ who, text });
+  return true;
+}
+function renderAgent(scroll) {
+  const el = document.getElementById("agent");
+  const p = current();
+  document.getElementById("desk-body").classList.toggle("agent-closed", !state.agentOpen);
+  if (!state.agentOpen) {
+    el.innerHTML = '<button type="button" class="agent-tab" data-action="toggle-agent">导演</button>';
+    return;
+  }
+  el.innerHTML =
+    '<div class="agent-head"><h2>导演</h2><button type="button" data-action="toggle-agent">收起</button></div>' +
+    '<p id="agent-ctx">' + esc(ctxText(p)) + "</p>" +
+    '<div class="quicks">' + QUICK.map(([id, label]) =>
+      '<button type="button" data-action="quick" data-quick="' + id + '">' + esc(label) + "</button>"
+    ).join("") + "</div>" +
+    '<div class="agent-log" id="agent-log">' + p.messages.map((m) => turnHTML(m.who, m.text)).join("") + "</div>" +
+    '<form class="agent-form" id="agent-form"><textarea id="agent-input" placeholder="指一帧，或一个时间码。"></textarea>' +
+    '<button type="submit" class="btn-ink">发送</button></form>';
+  const input = document.getElementById("agent-input");
+  if (input) input.value = state.agentDraft || "";
+  const log = document.getElementById("agent-log");
+  if (scroll && log) log.scrollTop = log.scrollHeight;
+}
+
+function shotTable(rows) {
+  return '<table class="shots"><thead><tr><th>镜</th><th>景别</th><th>画面</th><th>时长</th><th>注</th></tr></thead><tbody>' +
+    rows.map((r) => "<tr><td class='tc'>" + r[0] + "</td><td>" + esc(r[1]) + "</td><td>" + esc(r[2]) + "</td><td class='dur'>" + r[3] + "</td><td>" + esc(r[4]) + "</td></tr>").join("") +
+    "</tbody></table>";
+}
+function lineTable(lines) {
+  return '<table class="shots"><thead><tr><th>时码</th><th>字幕</th><th>停留</th></tr></thead><tbody>' +
+    lines.map((r) => "<tr><td class='tc'>" + r[0] + "</td><td>" + esc(r[1]) + "</td><td class='dur'>" + r[2] + "</td></tr>").join("") +
+    "</tbody></table>";
+}
+function head(num, title, extra) {
+  return '<div class="work-head"><h2><span class="sn">' + num + "</span>" + esc(title) + "</h2>" + (extra || "") + "</div>";
+}
+function renderWork() {
+  const p = current();
+  const style = styleOf(p);
+  const body = {
+    brief: briefHTML,
+    treatment: treatmentHTML,
+    frames: framesHTML,
+    board: boardHTML,
+    sound: soundHTML,
+    delivery: deliveryHTML,
+  }[p.stage](p, style);
+  document.getElementById("work").innerHTML = '<div class="work-inner">' + body + "</div>";
+  if (p.stage === "delivery") paintPlay();
+}
+function briefHTML(p, style) {
+  const board = p.board ? "要，Treatment 之后先看分镜" : "不要，Treatment 之后直接做风格帧";
+  return head("01", "简报", '<span class="file">BRIEF.md</span>') +
+    '<div class="work-body"><div class="manuscript">' + esc(p.idea) + "</div>" +
+    '<dl class="specs">' +
+    spec("语言", p.lang) + spec("时长", fmtDur(p.dur)) +
+    spec("配音", p.voice ? "要" : "不要") + spec("分镜", board) +
+    spec("风格", style.cn + " · " + style.slug) +
+    "</dl><p class='block-title'>磁盘</p><ul class='files'><li>BRIEF.md</li><li>project.json</li><li>style · " + style.slug + "</li></ul></div>";
+}
+function treatmentHTML(p, style) {
+  if (!p.treatmentReady) {
+    return head("02", "Treatment", '<span class="file">TREATMENT.md</span>') +
+      '<div class="work-body"><div class="writing"><p class="kicker">TREATMENT.md</p><p style="margin-top:12px">正在写三个结构、镜头表、节拍。<i class="caret"></i></p></div></div>';
+  }
+  let structures, shots, beats, sound;
+  if (p.id === "tide") {
+    structures = [
+      ["A", "从全景推入。潮水带走颜色，人一直很小。开头三秒不够抓人。不用。", false],
+      ["B", "先给退潮后的湿沙特写，第二秒才拉开。钩子在前三秒。远山留到中段。", true],
+      ["C", "只跟一条水线，从礁石走到脚边。太单。", false],
+    ];
+    shots = [
+      ["01", "特写", "湿沙，水线退去", "3s", "钩子。开头三秒不能空。"],
+      ["02", "全景", "拉开，岸与人", "6s", "第二秒之后才交代是谁。"],
+      ["03", "中景", "海面", "10s", "层次要在。纸白不能被吃掉。"],
+      ["04", "远景", "远山留白", "8s", "罩染降一档。"],
+      ["05", "特写", "浪尖", "6s", "留白。"],
+      ["06", "全景", "水走完，人还在", "12s", "回到湿沙，但是干的。"],
+    ];
+    beats = "00:00 湿沙　00:03 拉开　00:09 第一句　00:22 海面　00:36 远山　00:45 水走完";
+    sound = "环境：退潮、湿沙。人声：中文，6 条。配乐：未锁，等风格帧点头。";
+  } else if (p.id === "neighbor") {
+    structures = [
+      ["A", "从声音开始，先不给洞。稳，但前三秒没有东西可看。", false],
+      ["B", "先给墙上的洞，再倒回去讲每晚的声音。", true],
+      ["C", "两个小孩轮流说。太碎。", false],
+    ];
+    shots = [
+      ["01", "特写", "墙上的洞", "4s", "先给洞，不要先解释。"],
+      ["02", "中景", "小孩贴着墙听", "8s", "声音先于脸。"],
+      ["03", "特写", "蜡笔颗粒", "12s", "颗粒够了，不再加。"],
+      ["04", "全景", "两个小孩，一面墙", "21s", "洞变成共有的。"],
+    ];
+    beats = "00:00 洞　00:04 听　00:12 蜡笔　00:24 递笔　00:45 同一面墙";
+    sound = "环境：蜡笔摩擦墙面。人声：中文，6 条。配乐已混，−14.1 LUFS。";
+  } else {
+    structures = [
+      ["A", "顺着这件事讲完。稳，但开头三秒是空的。", false],
+      ["B", "先给一个看得清的特写，第二秒再交代是谁。钩子在前三秒。", true],
+      ["C", "只留一个物件走到结尾。太瘦，除非简报本身就是物件。", false],
+    ];
+    const names = ["特写，先给一个能看清的东西", "拉开，交代是谁", "中段，事情发生变化", "停一下，让句子落地", "推向结尾", "回到开头的东西，但变了"];
+    const durs = { 30: [3, 4, 6, 5, 5, 7], 45: [3, 6, 10, 8, 6, 12], 60: [4, 8, 12, 10, 8, 18] }[p.dur] || [3, 6, 10, 8, 6, 12];
+    let t = 0;
+    shots = durs.map((d, i) => {
+      const stamp = pad(Math.floor(t / 60)) + ":" + pad(t % 60);
+      t += d;
+      return [pad(i + 1), i === 0 ? "特写" : "中景", names[i], d + "s", "第一遍。对着简报改，不动风格。"];
+    });
+    beats = "按 " + fmtDur(p.dur) + " 排。开头 3 秒必须有一个能看清的东西。";
+    sound = p.voice ? "人声随语言走。配乐等画面点头再锁。" : "不配音，字幕不烧。只留环境和配乐。";
+  }
+  return head("02", "Treatment", '<span class="file">TREATMENT.md</span>') +
+    '<div class="work-body">' +
+    (p.id === "tide" || p.id === "neighbor" ? "" : '<div class="manuscript">' + esc(p.idea) + "</div>") +
+    '<p class="block-title">三个结构</p><ol class="structures">' +
+    structures.map(([k, text, picked]) =>
+      '<li class="' + (picked ? "picked" : "") + '"><span class="k">' + k + "</span>" + esc(text) +
+      (picked ? '<span class="tag">选用</span>' : "") + "</li>"
+    ).join("") + "</ol>" +
+    '<p class="block-title">镜头表</p>' + shotTable(shots) +
+    '<p class="beats">' + esc(beats) + "</p>" +
+    '<p class="block-title">声音</p><p>' + esc(sound) + "</p></div>";
+}
+function framesHTML(p, style) {
+  const bad = p.frames.find((f) => f.flag);
+  const note = !p.frames.length
+    ? "还没有风格帧。"
+    : bad
+      ? (bad.flag === "grey" ? "第 " + (p.frames.indexOf(bad) + 1) + " 帧待改 · 纸白被罩染吃掉" : "第 " + (p.frames.indexOf(bad) + 1) + " 帧已重抽 · 待看")
+      : "lint 通过。画面可以往下。";
+  const pulling = state.pulling === p.id;
+  let inner;
+  if (!p.frames.length) {
+    inner = '<div class="work-body"><p class="skip-note">还没有风格帧。按 STYLE.md 抽 3 张静帧，时间点从镜头表来。</p>' +
+      '<div class="actions"><button type="button" class="btn-ink" data-action="extract">按 STYLE.md 做 3 张风格帧</button></div></div>';
+  } else {
+    inner = '<div class="work-body">' + p.frames.map((f, i) => {
+      const flag = f.flag === "grey" ? "待改" : f.flag === "review" ? "待看" : "";
+      return '<figure class="still ' + (f.flag || "") + '">' +
+        '<button type="button" class="still-img' + (pulling ? " pulling" : "") + '" data-action="open-frame" data-index="' + i + '">' +
+        '<img src="' + poster(style) + '" alt="' + esc(f.name) + '" style="object-position:' + f.crop + '"></button>' +
+        "<figcaption><div class='still-meta'><span>" + tcStamp(f.t) + "</span><span>第 " + (i + 1) + " 帧 · " + esc(f.name) + "</span>" +
+        "<span>window.render(t) 有返回</span><span>lint 通过</span>" +
+        (f.pulled ? "<span>已重抽</span>" : "") +
+        (flag ? '<span class="flag">' + flag + "</span>" : "") +
+        "</div>" +
+        (f.note ? '<p class="anno"><span class="anno-k">批注</span>' + esc(f.note) + "</p>" : "") +
+        (flag ? '<button type="button" class="btn-text" data-action="accept-frame" data-index="' + i + '">这一帧可以</button>' : "") +
+        "</figcaption></figure>";
+    }).join("") + "</div>";
+  }
+  return head("03", "风格帧",
+    '<p class="work-note' + (bad ? " bad" : "") + '">' + esc(note) + "</p>" +
+    '<div class="work-actions"><button type="button" class="btn-ink" data-action="pull" ' + (pulling || !p.frames.length ? "disabled" : "") + ">" + (pulling ? "重抽中" : "重抽帧") + "</button>" +
+    '<button type="button" class="btn-ghost" data-action="ask-fix">让导演改这一帧</button></div>') + inner;
+}
+function boardHTML(p, style) {
+  if (p.skip.includes("board") && !p.boardShown) {
+    return head("04", "分镜", '<span class="file">跳过</span>') +
+      '<div class="work-body"><p class="skip-note">这份简报没有要先看分镜。Treatment 之后直接抽了风格帧。</p>' +
+      '<p style="margin-top:10px;color:var(--ink-2)">若要补，按镜头表抽 6 张拼一张 contact sheet，你点头才进声音。</p>' +
+      '<div class="actions"><button type="button" class="btn-ghost" data-action="show-board">仍要看分镜</button></div></div>';
+  }
+  const crops = ["10% 80%", "80% 20%", "40% 50%", "20% 20%", "60% 70%", "50% 30%"];
+  const times = ["00:02", "00:08", "00:16", "00:24", "00:32", "00:40"];
+  return head("04", "分镜", '<span class="file">CONTACT SHEET</span>') +
+    '<div class="work-body"><p class="skip-note">6 张关键帧。点头才继续，不点头就改镜头表。</p>' +
+    '<div class="sheet">' + crops.map((c, i) =>
+      '<figure><div class="crop"><img src="' + poster(style) + '" alt="" style="object-position:' + c + '"></div><figcaption>' + pad(i + 1) + " · " + times[i] + "</figcaption></figure>"
+    ).join("") + "</div></div>";
+}
+function soundHTML(p) {
+  const mix = p.versions.length ? "−14.1 LUFS" : "目标 −14 LUFS";
+  const rows = p.voice
+    ? [["配音", p.lines ? "已录 · " + p.lang : "未录"], ["回读", p.lines ? "通过，一句一字听过" : "—"], ["配乐", p.id === "neighbor" ? "已混" : "未锁，等画面点头"], ["混音", mix]]
+    : [["配音", "不做"], ["字幕", "不烧"], ["配乐", "未开始"], ["混音", "目标 −14 LUFS"]];
+  return head("05", "声音", '<span class="file">READCHECK</span>') +
+    '<div class="work-body"><dl class="specs">' + rows.map((r) => spec(r[0], r[1])).join("") + "</dl>" +
+    (p.lines ? '<p class="block-title">字幕停留</p>' + lineTable(p.lines) + '<p class="beats">readcheck 通过 · ' + p.lines.length + " 条字幕 · 最短 2.2s · 无遮挡</p>" : '<p class="block-title">字幕随 Treatment 的对白来，成片前跑 readcheck。</p>') +
+    "</div>";
+}
+function deliveryHTML(p, style) {
+  const cur = p.versions.find((v) => v.current) || p.versions[0];
+  const blocked = p.frames.some((f) => f.flag) || (cur && cur.kind === "草稿");
+  let player;
+  if (!cur) {
+    player = '<div class="player empty"><p class="no-film">无成片</p><span class="tc">00:00:00:00</span></div>' +
+      '<p class="readout">还没有成片。右上角新渲染，从 video.mjs 开始。</p>';
+  } else {
+    player = '<div class="player' + (state.playing ? " playing" : "") + '" data-action="toggle-play">' +
+      '<img src="' + poster(style) + '" alt="">' +
+      '<button type="button" class="play" tabindex="-1" aria-label="播放"><i class="glyph"></i></button>' +
+      '<span class="tc" id="tc">00:00:00:00</span>' +
+      '<div class="scrub" data-action="scrub"><i id="playhead"></i></div></div>' +
+      '<p class="readout' + (blocked ? " bad" : "") + '">' + (cur.lufs === "—" ? "—" : esc(cur.lufs) + " LUFS") + " · " + cur.dur + " · 24fps" +
+      (cur.kind === "草稿" ? " · 草稿不能交付" : cur.kind === "交付" ? " · 可以交" : "") + "</p>";
+  }
+  const vers = p.versions.length
+    ? '<div class="ver-cols"><span>版本</span><span>状态</span><span>响度</span><span>时长</span><span></span></div>' +
+      p.versions.map((v, i) =>
+      '<button type="button" class="ver" data-action="set-version" data-index="' + i + '" aria-current="' + (v.current ? "true" : "false") + '">' +
+      '<span class="vid">' + v.id + '</span><span class="kind">' + esc(v.kind) + "</span>" +
+      '<span class="meta">' + (v.lufs === "—" ? "—" : esc(v.lufs) + " LUFS") + "</span>" +
+      '<span class="vdur">' + v.dur + "</span><span>" + (v.current ? "当前" : "") + "</span></button>"
+    ).join("")
+    : '<p class="none">无版本</p>';
+  return head("06", "成片", '<span class="file">video.mjs · mux.sh</span>') +
+    '<div class="work-body"><div class="delivery">' + player +
+    '<div class="film-open"><button type="button" class="btn-text" data-action="open-film">打开成片</button>' +
+    '<span class="path">' + esc(filmPath(p)) + "/" + esc(p.title) + ".mp4</span></div>" +
+    '<div class="versions">' + vers + "</div></div></div>";
+}
+
+function renderDesk(opts) {
+  renderHead();
+  renderChapters();
+  renderWork();
+  renderAgent(opts && opts.scrollAgent);
+  renderQC();
+}
+function setStage(id) {
+  const p = current();
+  if (!p || p.stage === id) return;
+  stopPlay();
+  p.stage = id;
+  renderHead();
+  renderChapters();
+  renderWork();
+  const ctx = document.getElementById("agent-ctx");
+  if (ctx) ctx.textContent = ctxText(p);
+}
+
+function ensureFrames(p) {
+  if (p.frames.length) return;
+  const times = p.dur === 30 ? ["00:04", "00:14", "00:24"] : p.dur === 60 ? ["00:08", "00:28", "00:48"] : ["00:08", "00:22", "00:36"];
+  const names = ["开头", "中段", "结尾"];
+  p.frames = times.map((t, i) => ({ t, name: names[i], crop: CROPS[i], flag: "", note: "", pulled: false }));
+}
+function startExtract(p) {
+  if (p.frames.length || state.pulling) return;
+  state.pulling = p.id;
+  state.liveHot = true;
+  [0, 1, 2].forEach((i) => setTimeout(() => {
+    if (state.pulling !== p.id) return;
+    state.live = "still.mjs · 抽帧 " + (i + 1) + "/3";
+    paintLive();
+  }, i * 450));
+  setTimeout(() => {
+    if (state.pulling !== p.id) return;
+    ensureFrames(p);
+    state.pulling = null;
+    state.liveHot = false;
+    state.live = "3 张风格帧已抽出。先看中段。";
+    addTurn(p, "导演", "三张按 STYLE.md 抽完。先看中段那张，灰不灰一眼能看出来。");
+    if (showingDesk(p.id)) renderDesk({ scrollAgent: true });
+  }, 1500);
+}
+function startPull(p) {
+  if (!p.frames.length || state.pulling) return;
+  state.pulling = p.id;
+  state.liveHot = true;
+  document.querySelectorAll(".still-img").forEach((el) => el.classList.add("pulling"));
+  const btn = document.querySelector('[data-action="pull"]');
+  if (btn) { btn.textContent = "重抽中"; btn.disabled = true; }
+  p.frames.forEach((f, i) => setTimeout(() => {
+    if (state.pulling !== p.id) return;
+    state.live = "still.mjs · 重抽 " + (i + 1) + "/3 · " + tcStamp(f.t);
+    paintLive();
+  }, i * 480));
+  setTimeout(() => {
+    if (state.pulling !== p.id) return;
+    p.frames.forEach((f) => { f.pulled = true; });
+    const grey = p.frames.find((f) => f.flag === "grey");
+    if (grey) {
+      grey.flag = "review";
+      grey.note = "罩染已降一档，浪尖留白提回来了。待看。";
+    }
+    state.pulling = null;
+    state.liveHot = false;
+    state.live = "三张重抽完。看海面还有没有层次。";
+    addTurn(p, "导演", "三张重抽完。第 2 帧罩染降了一档，你看海面还有没有层次。时间轴没动。");
+    if (showingDesk(p.id)) renderDesk({ scrollAgent: true });
+  }, 1600);
+}
+function startRender(p) {
+  if (state.rendering) return;
+  state.rendering = { id: p.id, t: 0, phase: "video.mjs" };
+  state.liveHot = true;
+  paintLive();
+  const total = 138;
+  const timer = setInterval(() => {
+    const r = state.rendering;
+    if (!r || r.id !== p.id) { clearInterval(timer); return; }
+    r.t += 8;
+    if (r.t >= total - 16) r.phase = "mux.sh";
+    const shown = Math.min(r.t, total);
+    state.live = r.phase + " · " + fmtDur(shown) + " / 02:18";
+    state.liveHot = true;
+    if (showingDesk(p.id)) paintLive();
+    if (r.t >= total) {
+      clearInterval(timer);
+      setTimeout(() => finishRender(p.id), 420);
+    }
+  }, 220);
+}
+function finishRender(id) {
+  const p = projects[id];
+  if (!p) return;
+  state.rendering = null;
+  const n = p.versions.length + 1;
+  const blocked = !p.frames.length || p.frames.some((f) => f.flag);
+  p.versions.forEach((v) => { v.current = false; });
+  p.versions.unshift({ id: "v" + n, kind: blocked ? "草稿" : "成片", lufs: "−14.1", dur: fmtDur(p.dur), current: true });
+  p.renderTime = "2 分 18 秒";
+  if (!blocked && !p.done.includes("delivery")) p.done.push("delivery");
+  p.stage = "delivery";
+  state.liveHot = blocked;
+  state.live = blocked
+    ? "已写入 v" + n + " 草稿 · 2 分 18 秒 · 还有帧待改，不能交付"
+    : "已写入 v" + n + " 成片 · 2 分 18 秒 · −14.1 LUFS";
+  addTurn(p, "导演", blocked
+    ? "草稿出来了。响度 −14.1，但有帧没点头，这一版不能标交付。"
+    : "成片出来了。−14.1 LUFS，无黑帧。可以交的话，再说一声。");
+  if (showingDesk(id)) renderDesk({ scrollAgent: true });
+}
+function askFix() {
+  const p = current();
+  if (!p.frames.length) {
+    addTurn(p, "导演", "还没有帧。先抽 3 张，再告诉我哪一张不行。");
+    p.stage = "frames";
+    renderDesk({ scrollAgent: true });
+    return;
+  }
+  const idx = Math.max(0, p.frames.findIndex((f) => f.flag === "grey" || f.flag === "review"));
+  const f = p.frames[idx];
+  p.stage = "frames";
+  if (f && (f.flag || p.id === "tide")) {
+    addTurn(p, "你", "第二张太灰了，海面看不出层次。");
+    addTurn(p, "导演", GREY_REPLY);
+    if (!f.flag) f.flag = "grey";
+    if (!f.note) f.note = "纸白被水彩罩染吃掉。远山降一档，浪尖留白。";
+  } else {
+    addTurn(p, "你", "让导演改这一帧。");
+    addTurn(p, "导演", "第 " + (idx + 1) + " 帧你看着别扭的话，说是灰、是糊，还是构图。我改绘制，不动时间轴。");
+  }
+  renderDesk({ scrollAgent: true });
+}
+function acceptFrame(i) {
+  const p = current();
+  const f = p.frames[i];
+  if (!f) return;
+  f.flag = "";
+  if (!p.frames.some((x) => x.flag) && !p.done.includes("frames")) p.done.push("frames");
+  addTurn(p, "你", "第 " + (i + 1) + " 帧可以。");
+  addTurn(p, "导演", p.frames.some((x) => x.flag) ? "这一帧点头。还有帧没看。" : "三张都过了。可以谈声音，或直接出草稿。");
+  renderDesk({ scrollAgent: true });
+}
+function runQuick(id) {
+  const p = current();
+  const style = styleOf(p);
+  const label = QUICK.find((q) => q[0] === id)[1];
+  addTurn(p, "你", label);
+  if (id === "treatment") {
+    p.stage = "treatment";
+    addTurn(p, "导演", "三个结构里我选先给特写的那个。开头三秒不能是空镜。Treatment 在 TREATMENT.md，风格不动。");
+  } else if (id === "frames") {
+    p.stage = "frames";
+    addTurn(p, "导演", "按 " + style.cn + " 的 STYLE.md 抽三张。你先看中段，灰不灰不用等成片。");
+    if (!p.frames.length) startExtract(p);
+  } else if (id === "grey") {
+    askFix();
+    return;
+  } else if (id === "board") {
+    p.stage = "board";
+    if (p.skip.includes("board")) p.boardShown = true;
+    addTurn(p, "导演", p.board ? "按镜头表接 6 张。你点头我才进声音。" : "简报没要求先看分镜。这张 contact sheet 是补的，不点头就不进声音。");
+  } else if (id === "subs") {
+    p.stage = "sound";
+    addTurn(p, "导演", p.lines ? "6 条都超过 1.8 秒。最短 2.2 秒。没有遮住主体。readcheck 通过。" : "字幕还没写死。等 Treatment 的对白落了再跑 readcheck。");
+  } else if (id === "render") {
+    const blocked = !p.frames.length || p.frames.some((f) => f.flag);
+    addTurn(p, "导演", blocked ? "可以出草稿。有帧没点头的话，这一版不能标交付。" : "画面点过头。出成片，mux 之后看 −14 LUFS。");
+    startRender(p);
+  }
+  renderDesk({ scrollAgent: true });
+}
+function freeReply(text, p) {
+  if (/灰|层次|罩染|留白|海面/.test(text)) return p.id === "tide" ? GREY_REPLY : "灰通常是纸色被罩染吃了。指出第几帧，我降罩染，不动时间轴。";
+  if (/开头|三秒|抓人/.test(text)) return p.id === "tide" ? OPEN_REPLY : "开头三秒不要空镜。先给一个看得清的特写，第二秒再交代是谁。改镜头表，不动风格。";
+  if (/字幕|停留|遮挡/.test(text)) return "readcheck 的底线是 1.8 秒。你要是觉得赶，指出第几条。";
+  if (/交付|能交|可以交/.test(text)) {
+    if (p.frames.some((f) => f.flag)) return "还不能交。有一帧没点头，lint 过了也不算。改完再抽，再谈交付。";
+    if (!p.versions.some((v) => v.kind === "成片" || v.kind === "交付")) return "画面可以谈，但还没有成片。先渲染，看响度和黑帧。";
+    return "可以交。响度、字幕、黑帧都在页脚那一行。";
+  }
+  if (/配乐|音乐/.test(text)) return "配乐等画面点头再锁。现在铺音乐，画面一改就白铺。";
+  if (/配音|人声/.test(text)) return p.voice ? "人声先回读，一句一字。过了再混。" : "这一支不配音。不要临时加人声。";
+  return "听到了。指一帧，或一个时间码。我改那一处，不动整支。";
+}
+function sendAgent() {
+  const p = current();
+  if (!p) return;
+  const text = (state.agentDraft || "").trim();
+  if (!text) return;
+  state.agentDraft = "";
+  addTurn(p, "你", text);
+  addTurn(p, "导演", freeReply(text, p));
+  if (/灰|层次|海面/.test(text) && p.frames.length) p.stage = "frames";
+  renderDesk({ scrollAgent: true });
+}
+
+function stopPlay() {
+  if (state.playTimer) clearInterval(state.playTimer);
+  state.playTimer = null;
+  state.playing = false;
+}
+function playTotal() {
+  const p = current();
+  if (!p) return 45 * 24;
+  const cur = p.versions.find((v) => v.current);
+  const dur = cur && cur.dur === "00:41" ? 41 : p.dur;
+  return dur * 24;
+}
+function paintPlay() {
+  const tc = document.getElementById("tc");
+  const head = document.getElementById("playhead");
+  const player = document.querySelector(".player");
+  if (!tc || !player || player.classList.contains("empty")) return;
+  const total = playTotal();
+  tc.textContent = tcFrames(state.playFrame);
+  if (head) head.style.width = (100 * state.playFrame / total) + "%";
+  player.classList.toggle("playing", state.playing);
+}
+function togglePlay() {
+  const p = current();
+  if (!p || !p.versions.length) return;
+  if (state.playing) { stopPlay(); paintPlay(); return; }
+  state.playing = true;
+  const total = playTotal();
+  state.playTimer = setInterval(() => {
+    state.playFrame += 1;
+    if (state.playFrame >= total) { state.playFrame = total; stopPlay(); }
+    paintPlay();
+  }, 1000 / 24);
+  paintPlay();
+}
+function openOverlay(i) {
+  const p = current();
+  const f = p.frames[i];
+  if (!f) return;
+  state.overlay = i;
+  const img = document.getElementById("overlay-img");
+  img.src = poster(styleOf(p));
+  img.style.objectPosition = f.crop;
+  img.alt = f.name;
+  const flag = f.flag === "grey" ? "待改" : f.flag === "review" ? "待看" : "lint 通过";
+  document.getElementById("overlay-cap").innerHTML =
+    '<div class="still-meta"><span>' + tcStamp(f.t) + "</span><span>第 " + (i + 1) + " 帧 · " + esc(f.name) + "</span><span class='" + (f.flag ? "flag" : "") + "'>" + flag + "</span></div>" +
+    (f.note ? '<p class="anno" style="margin-top:8px"><span class="anno-k">批注</span>' + esc(f.note) + "</p>" : "");
+  document.getElementById("overlay").hidden = false;
+}
+function closeOverlay(silent) {
+  state.overlay = null;
+  const el = document.getElementById("overlay");
+  if (el) el.hidden = true;
+  if (!silent) return;
+}
+function shiftOverlay(dir) {
+  const p = current();
+  if (!p || state.overlay == null) return;
+  const n = p.frames.length;
+  if (!n) return;
+  openOverlay((state.overlay + dir + n) % n);
+}
+
+document.addEventListener("click", (e) => {
+  const el = e.target.closest("[data-action]");
+  if (!el) return;
+  const action = el.dataset.action;
+  if (action === "scrub") {
+    const p = current();
+    if (!p || !p.versions.length) return;
+    const r = el.getBoundingClientRect();
+    const ratio = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+    state.playFrame = Math.floor(ratio * playTotal());
+    paintPlay();
+    return;
+  }
+  if (action === "set-cat") {
+    state.cat = el.dataset.cat;
+    paintRail();
+    renderPlates();
+    return;
+  }
+  if (action === "open-style") {
+    state.galleryScroll = document.getElementById("catalog-main").scrollTop;
+    go("#/new/" + el.dataset.slug);
+    return;
+  }
+  if (action === "open-project") {
+    state.galleryScroll = document.getElementById("catalog-main").scrollTop;
+    go("#/desk/" + el.dataset.id);
+    return;
+  }
+  if (action === "clear-search") {
+    state.q = "";
+    const q = document.getElementById("q");
+    if (q) q.value = "";
+    renderPlates();
+    return;
+  }
+  if (action === "back") {
+    go("#/");
+    return;
+  }
+  if (action === "set-choice") {
+    const field = el.dataset.field;
+    const value = el.dataset.value;
+    if (field === "dur") state.draft.dur = Number(value);
+    else if (field === "voice" || field === "board") state.draft[field] = value === "true";
+    else state.draft[field] = value;
+    state.draft.error = "";
+    renderForm();
+    return;
+  }
+  if (action === "toggle-advanced") {
+    state.draft.advanced = !state.draft.advanced;
+    renderForm();
+    return;
+  }
+  if (action === "create") { createProject(); return; }
+  if (action === "set-stage") { setStage(el.dataset.stage); return; }
+  if (action === "toggle-agent") {
+    state.agentOpen = !state.agentOpen;
+    renderAgent(true);
+    return;
+  }
+  if (action === "pull") { startPull(current()); return; }
+  if (action === "extract") { startExtract(current()); return; }
+  if (action === "ask-fix") { askFix(); return; }
+  if (action === "accept-frame") { acceptFrame(Number(el.dataset.index)); return; }
+  if (action === "quick") { runQuick(el.dataset.quick); return; }
+  if (action === "render") { startRender(current()); return; }
+  if (action === "finder") {
+    const p = current();
+    state.liveHot = false;
+    state.live = "Finder · " + filmPath(p);
+    paintLive();
+    setTimeout(() => {
+      if (state.live.startsWith("Finder")) { state.live = ""; paintLive(); }
+    }, 2800);
+    return;
+  }
+  if (action === "toggle-play") { togglePlay(); return; }
+  if (action === "set-version") {
+    const p = current();
+    p.versions.forEach((v, i) => { v.current = i === Number(el.dataset.index); });
+    stopPlay();
+    state.playFrame = 0;
+    renderWork();
+    return;
+  }
+  if (action === "open-film") {
+    const p = current();
+    state.liveHot = false;
+    state.live = "已打开 · " + filmPath(p) + "/" + p.title + ".mp4";
+    paintLive();
+    return;
+  }
+  if (action === "open-frame") { openOverlay(Number(el.dataset.index)); return; }
+  if (action === "close-overlay") { closeOverlay(); return; }
+  if (action === "overlay-prev") { shiftOverlay(-1); return; }
+  if (action === "overlay-next") { shiftOverlay(1); return; }
+  if (action === "show-board") {
+    const p = current();
+    p.boardShown = true;
+    if (p.skip.includes("board")) p.skip = p.skip.filter((s) => s !== "board");
+    renderWork();
+    renderChapters();
+    return;
+  }
+});
+document.addEventListener("input", (e) => {
+  if (e.target.id === "q") { state.q = e.target.value; renderPlates(); }
+  if (e.target.id === "idea") { state.draft.idea = e.target.value; state.draft.error = ""; }
+  if (e.target.id === "agent-input") state.agentDraft = e.target.value;
+});
+document.addEventListener("submit", (e) => {
+  if (e.target.id === "agent-form") { e.preventDefault(); sendAgent(); }
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") { closeOverlay(); return; }
+  if (e.key === "Enter" && e.target.id === "desk-title") { e.preventDefault(); e.target.blur(); }
+  if (e.key === "Enter" && e.target.id === "agent-input" && !e.shiftKey) { e.preventDefault(); sendAgent(); }
+  if (state.overlay != null && e.key === "ArrowRight") shiftOverlay(1);
+  if (state.overlay != null && e.key === "ArrowLeft") shiftOverlay(-1);
+});
+document.addEventListener("focusout", (e) => {
+  if (e.target.id !== "desk-title") return;
+  const p = current();
+  if (!p) return;
+  const t = e.target.textContent.replace(/\s+/g, " ").trim();
+  p.title = t ? t.slice(0, 32) : p.title;
+  e.target.textContent = p.title;
+  const path = document.getElementById("desk-path");
+  if (path) path.innerHTML = '<span class="mark" aria-hidden="true"></span>' + esc(filmPath(p));
+});
+document.getElementById("catalog-main").addEventListener("scroll", updateFolio, { passive: true });
+document.addEventListener("error", (e) => {
+  if (e.target && e.target.tagName === "IMG") e.target.style.opacity = "0";
+}, true);
+
+renderRail();
+if (!location.hash) history.replaceState(null, "", "#/");
+route();
+window.addEventListener("hashchange", route);
+  </script>
+</body>
+</html>

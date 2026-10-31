@@ -1,0 +1,1830 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>视频工坊 · 画法</title>
+<style>
+  :root {
+    --bg: #0c0b0a;
+    --bg-2: #14120f;
+    --bg-3: #1c1916;
+    --cream: #f2ece1;
+    --cream-2: #c9c1b4;
+    --mute: #8a8176;
+    --line: rgba(242, 236, 225, 0.14);
+    --line-2: rgba(242, 236, 225, 0.28);
+    --red: #e2452f;
+    --serif: "Songti SC", "STSong", "Songti TC", "Noto Serif CJK SC", "Source Han Serif SC", serif;
+    --sans: "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Source Han Sans SC", sans-serif;
+    --mono: "SF Mono", "Menlo", "ui-monospace", monospace;
+    --pad: 40px;
+    --rail: 152px;
+    --dock: 312px;
+  }
+  * { box-sizing: border-box; }
+  html { color-scheme: dark; background: var(--bg); }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--cream);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.5;
+    min-width: 1180px;
+  }
+  body.desk-on { height: 100vh; overflow: hidden; }
+  h1, h2, h3, p { margin: 0; }
+  button, input, textarea { font: inherit; color: inherit; }
+  button {
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    text-align: left;
+  }
+  input, textarea {
+    background: none;
+    border: 0;
+    border-radius: 0;
+    outline: none;
+  }
+  img { display: block; max-width: 100%; }
+  ::selection { background: var(--red); color: var(--cream); }
+  button:focus-visible { outline: 1px solid var(--red); outline-offset: 3px; }
+  input:focus-visible, textarea:focus-visible { outline: none; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: #3a342c; }
+  ::-webkit-scrollbar-track { background: transparent; }
+
+  .kicker, .mono, .num, .dur, .tc, .qc, .readout, .rail-foot, .status-line {
+    font-family: var(--mono);
+  }
+
+  /* gallery */
+  .gallery { padding: 28px var(--pad) 72px; }
+  .mast {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 32px;
+  }
+  .kicker {
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    color: var(--mute);
+    margin-bottom: 10px;
+  }
+  .kicker b { font-weight: 400; color: var(--cream-2); margin-right: 14px; letter-spacing: 0.08em; }
+  .mast h1 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 76px;
+    line-height: 0.95;
+    letter-spacing: 0.04em;
+  }
+  .mast-side { text-align: right; padding-bottom: 6px; }
+  .mast-side .lib {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-weight: 400;
+    margin-bottom: 6px;
+  }
+  .live {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--cream-2);
+  }
+  .live i {
+    width: 6px;
+    height: 6px;
+    background: var(--red);
+    display: block;
+  }
+  .dek {
+    max-width: 28em;
+    margin-top: 14px;
+    color: var(--cream-2);
+    font-size: 14px;
+  }
+
+  .now {
+    display: grid;
+    grid-template-columns: 72px 1fr;
+    margin-top: 32px;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .now-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: var(--mute);
+    padding-top: 16px;
+  }
+  .now-row {
+    display: flex;
+    align-items: baseline;
+    gap: 22px;
+    width: 100%;
+    padding: 13px 0;
+    border-bottom: 1px solid var(--line);
+    color: var(--cream);
+  }
+  .now-row:last-child { border-bottom: 0; }
+  .now-row .sq {
+    width: 6px;
+    height: 6px;
+    border: 1px solid var(--mute);
+  }
+  .now-row.live .sq { background: var(--red); border-color: var(--red); }
+  .now-row:hover .sq { background: var(--red); border-color: var(--red); }
+  .now-row .title { font-family: var(--serif); font-size: 18px; line-height: 1.3; min-width: 9em; }
+  .now-row .st { margin-left: auto; }
+  .now-row .sub, .now-row .dur, .now-row .st, .now-row .go {
+    font-size: 12px;
+    color: var(--mute);
+  }
+  .now-row .dur, .now-row .st { font-family: var(--mono); }
+  .now-row:hover .title { color: var(--cream); }
+  .now-row:hover .go { color: var(--cream); }
+
+  .catalog {
+    display: grid;
+    grid-template-columns: 188px minmax(0, 1fr);
+    gap: 40px;
+    margin-top: 36px;
+    align-items: start;
+  }
+  .index { position: sticky; top: 20px; max-height: calc(100vh - 40px); overflow: auto; }
+  .search { display: flex; flex-direction: column; gap: 4px; margin-bottom: 18px; border-bottom: 1px solid var(--line); }
+  .search span {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    color: var(--mute);
+  }
+  .search input {
+    font-family: var(--serif);
+    font-size: 16px;
+    padding: 4px 0 8px;
+    width: 100%;
+  }
+  .search input::placeholder { color: var(--mute); font-family: var(--sans); font-size: 13px; }
+  .index button.cat {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    width: 100%;
+    gap: 8px;
+    border-left: 2px solid transparent;
+    padding: 6px 0 6px 10px;
+    color: var(--mute);
+    font-size: 13px;
+  }
+  .index button.cat em {
+    font-style: normal;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--mute);
+  }
+  .index button.cat:hover { color: var(--cream-2); }
+  .index button.cat.on { color: var(--cream); border-left-color: var(--red); }
+  .index button.cat.on em { color: var(--cream-2); }
+  .index .rule { height: 1px; background: var(--line); margin: 8px 0 8px 12px; }
+
+  .wall-head {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    color: var(--mute);
+    margin-bottom: 18px;
+    display: flex;
+    gap: 12px;
+    align-items: baseline;
+  }
+  .wall-head b { font-weight: 400; color: var(--cream); }
+  .wall-head button { color: var(--cream-2); border-bottom: 1px solid var(--line-2); font-size: 12px; }
+  .wall {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 42px 28px;
+    align-content: start;
+  }
+  .sec-head {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-top: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--line);
+  }
+  .sec-head:first-child { margin-top: 0; }
+  .sec-head .ix {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    color: var(--red);
+  }
+  .sec-head h2 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 28px;
+    line-height: 1.2;
+  }
+  .sec-head .ct { font-family: var(--mono); font-size: 12px; color: var(--mute); }
+
+  .plate { display: flex; flex-direction: column; gap: 12px; color: inherit; min-width: 0; animation: rise 520ms cubic-bezier(.2,.7,.2,1) both; }
+  .plate.lead { grid-column: 1 / -1; }
+  .frame { position: relative; aspect-ratio: 16/9; overflow: hidden; background: #000; }
+  .frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1.015);
+    transition: transform 520ms cubic-bezier(.2,.6,.2,1);
+  }
+  .plate:hover .frame img { transform: scale(1.05); }
+  .plate.lead .frame img { transform: scale(1.07); object-position: 50% 42%; }
+  .plate.lead:hover .frame img { transform: scale(1.11); }
+  .vignette {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 46%, rgba(12,11,10,0.62) 100%);
+    opacity: 0;
+    transition: opacity 420ms ease;
+    pointer-events: none;
+  }
+  .plate:hover .vignette { opacity: 1; }
+  .float {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    display: flex;
+    justify-content: space-between;
+    padding: 28px 14px 10px;
+    background: linear-gradient(transparent, rgba(12,11,10,0.78));
+    color: var(--cream);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: 360ms cubic-bezier(.2,.7,.2,1);
+    pointer-events: none;
+  }
+  .plate:hover .float { opacity: 1; transform: none; }
+  .plate.lead .float { display: none; }
+  .burn {
+    position: absolute;
+    left: 0; right: 0; top: 0;
+    padding: 16px 22px 56px;
+    background: linear-gradient(180deg, rgba(12,11,10,0.88) 0%, rgba(12,11,10,0.4) 46%, rgba(12,11,10,0) 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    pointer-events: none;
+  }
+  .burn .num { font-family: var(--mono); font-size: 12px; letter-spacing: 0.14em; color: var(--cream); }
+  .burn .cn {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(32px, 3.6vw, 52px);
+    line-height: 1.08;
+    color: var(--cream);
+    text-shadow: 0 1px 2px rgba(12,11,10,0.7);
+  }
+  .cap {
+    display: grid;
+    grid-template-columns: 32px minmax(0, 1fr) auto;
+    column-gap: 10px;
+    row-gap: 3px;
+    align-items: baseline;
+  }
+  .cap .num { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; color: var(--mute); }
+  .plate:hover .cap .num { color: var(--red); }
+  .cap .cn { font-family: var(--serif); font-size: 22px; font-weight: 400; line-height: 1.25; }
+  .cap .dur { font-family: var(--mono); font-size: 11px; color: var(--mute); }
+  .cap .en { grid-column: 2 / 4; font-size: 12px; color: var(--mute); letter-spacing: 0.02em; }
+  .cap .line { grid-column: 2 / 4; font-size: 13px; line-height: 1.55; color: var(--cream-2); margin-top: 2px; }
+  .plate.lead .cap .cn { font-family: var(--sans); font-size: 13px; color: var(--cream-2); }
+  .empty { grid-column: 1 / -1; padding: 48px 0; }
+  .now-row .sq { display: block; }
+  .empty .cn { font-family: var(--serif); font-size: 28px; font-weight: 400; margin-bottom: 8px; }
+  .empty p { color: var(--mute); }
+
+  /* new */
+  .screen-new { min-height: 100vh; display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(440px, 0.92fr); }
+  .hero { position: sticky; top: 0; height: 100vh; overflow: hidden; background: #000; }
+  .hero img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 32% 36%;
+    transform: scale(1.28);
+  }
+  .hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(90deg, rgba(12,11,10,0.86) 0%, rgba(12,11,10,0.28) 7%, rgba(12,11,10,0.06) 18%, var(--bg) 96%),
+      linear-gradient(180deg, rgba(12,11,10,0.7) 0%, rgba(12,11,10,0) 20%, rgba(12,11,10,0) 48%, rgba(12,11,10,0.96) 86%);
+    pointer-events: none;
+  }
+  .hero-back {
+    position: absolute;
+    z-index: 2;
+    top: 22px;
+    left: 24px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: var(--cream);
+  }
+  .hero-back:hover { color: var(--red); }
+  .hero-copy {
+    position: absolute;
+    z-index: 1;
+    left: 28px;
+    bottom: 36px;
+    right: 20%;
+  }
+  .hero-copy h2, .hero-copy .line { text-shadow: 0 1px 2px rgba(12,11,10,0.45); }
+  .hero-copy .num { font-family: var(--mono); font-size: 12px; letter-spacing: 0.14em; color: var(--cream); }
+  .hero-copy h2 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(36px, 4vw, 60px);
+    line-height: 1.08;
+    margin: 8px 0 12px;
+  }
+  .hero-copy .en { font-size: 13px; letter-spacing: 0.04em; color: var(--cream-2); margin-bottom: 14px; }
+  .hero-copy .line { font-size: 15px; line-height: 1.65; max-width: 28em; color: var(--cream); }
+  .hero-copy .meta { margin-top: 14px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em; color: var(--cream-2); }
+
+  .form-col {
+    min-height: 100vh;
+    max-height: 100vh;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    padding: 28px 40px 28px 24px;
+    background: var(--bg);
+  }
+  .form-kicker { font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; color: var(--mute); margin-bottom: 18px; }
+  .field-lab {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: var(--mute);
+    margin-bottom: 8px;
+  }
+  .idea {
+    flex: 1;
+    min-height: 168px;
+    width: 100%;
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    padding: 16px 16px 18px;
+    font-family: var(--serif);
+    font-size: 18px;
+    line-height: 1.65;
+    resize: none;
+  }
+  .idea:focus { border-color: var(--cream-2); }
+  .idea.bad { border-color: var(--red); }
+  .idea::placeholder { color: var(--mute); font-family: var(--sans); font-size: 14px; }
+  .err { color: var(--red); font-size: 13px; margin-top: 8px; }
+  .opt-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 11px 0;
+    border-top: 1px solid var(--line);
+    margin-top: 14px;
+  }
+  .opt-row + .opt-row, .adv + .opt-row, .hint + .opt-row { margin-top: 0; }
+  .opt-row .lab { font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; color: var(--mute); }
+  .choices { display: flex; gap: 20px; }
+  .choices button {
+    border-bottom: 2px solid transparent;
+    padding: 0 0 3px;
+    color: var(--mute);
+    font-family: var(--serif);
+    font-size: 22px;
+    line-height: 1.2;
+  }
+  .choices button:hover { color: var(--cream-2); }
+  .choices button.on { color: var(--cream); border-bottom-color: var(--red); }
+  .adv {
+    margin-top: 4px;
+    color: var(--cream-2);
+    font-size: 13px;
+    border-bottom: 1px solid var(--line-2);
+    padding-bottom: 2px;
+    align-self: flex-start;
+  }
+  .hint { color: var(--mute); font-size: 13px; line-height: 1.6; margin: 10px 0 4px; max-width: 36em; }
+  .actions {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+  }
+  .btn {
+    background: var(--red);
+    color: var(--cream);
+    font-size: 15px;
+    padding: 13px 20px;
+    border: 0;
+  }
+  .btn:hover { background: #c93b28; }
+  .btn:disabled { opacity: 0.45; cursor: default; }
+  .btn-ghost {
+    background: transparent;
+    color: var(--cream);
+    border: 1px solid var(--line-2);
+    padding: 9px 12px;
+    font-size: 13px;
+  }
+  .btn-ghost:hover { border-color: var(--cream-2); }
+  .btn-text {
+    color: var(--cream-2);
+    border-bottom: 1px solid var(--line-2);
+    padding-bottom: 2px;
+    font-size: 14px;
+  }
+  .btn-text:hover { color: var(--cream); border-bottom-color: var(--cream); }
+
+  /* desk */
+  .desk { height: 100vh; display: grid; grid-template-rows: 56px minmax(0, 1fr); }
+  .top {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 0 22px;
+    border-bottom: 1px solid var(--line);
+    min-width: 0;
+  }
+  .top .back {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--mute);
+    flex: none;
+  }
+  .top .back:hover { color: var(--cream); }
+  .title-line { display: flex; align-items: baseline; min-width: 0; flex: 0 1 auto; }
+  .title-line .bq { font-family: var(--serif); font-size: 22px; flex: none; }
+  .title-line input {
+    font-family: var(--serif);
+    font-size: 22px;
+    width: 8em;
+    border-bottom: 1px solid transparent;
+    padding: 0 1px 1px;
+  }
+  .title-line input:focus { border-bottom-color: var(--red); }
+  .meta {
+    font-size: 12px;
+    color: var(--mute);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+  .status-line {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--cream-2);
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+  .top .btn-ghost, .top .btn { flex: none; }
+  .top .btn { padding: 8px 12px; font-size: 13px; }
+  .rbar { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; }
+  .rbar i { display: block; height: 100%; width: 0; background: var(--red); }
+  .rbar.on i { width: 100%; transition: width 1.25s linear; }
+
+  .body {
+    display: grid;
+    grid-template-columns: var(--rail) minmax(0, 1fr) var(--dock);
+    min-height: 0;
+    transition: grid-template-columns 220ms cubic-bezier(.2,.7,.2,1);
+  }
+  .body.shut { grid-template-columns: var(--rail) minmax(0, 1fr) 36px; }
+
+  .rail {
+    border-right: 1px solid var(--line);
+    padding: 18px 14px 14px 16px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .rail-stages { position: relative; display: flex; flex-direction: column; gap: 2px; }
+  .rail-stages::before {
+    content: "";
+    position: absolute;
+    left: 3px;
+    top: 10px;
+    bottom: 10px;
+    width: 1px;
+    background: var(--line);
+  }
+  .stage-btn {
+    display: grid;
+    grid-template-columns: 14px 28px minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
+    height: 38px;
+    color: var(--mute);
+    position: relative;
+  }
+  .stage-btn:hover { color: var(--cream-2); }
+  .stage-btn .hole {
+    width: 8px;
+    height: 11px;
+    border: 1px solid rgba(242, 236, 225, 0.38);
+    background: var(--bg);
+    position: relative;
+    z-index: 1;
+  }
+  .stage-btn.done .hole { background: var(--cream-2); border-color: var(--cream-2); }
+  .stage-btn.on { color: var(--cream); }
+  .stage-btn.on .name { font-family: var(--serif); font-size: 15px; }
+  .stage-btn.on .hole { background: var(--red); border-color: var(--red); }
+  .stage-btn .n { font-family: var(--mono); font-size: 11px; }
+  .stage-btn .name { font-size: 13px; white-space: nowrap; }
+  .rail-foot {
+    margin-top: auto;
+    border-top: 1px solid var(--line);
+    padding-top: 12px;
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--mute);
+  }
+  .rail-foot strong { font-weight: 400; color: var(--cream); }
+
+  .stage {
+    min-width: 0;
+    min-height: 0;
+    overflow: auto;
+    padding: 16px 22px 14px;
+  }
+  .stage-in { animation: stagein 240ms cubic-bezier(.2,.7,.2,1); }
+  .screen-col { width: min(100%, calc((100vh - 348px) * 16 / 9)); }
+  .matte {
+    background: #000;
+    border: 1px solid rgba(242, 236, 225, 0.22);
+    padding: 8px;
+  }
+  .gate {
+    position: relative;
+    aspect-ratio: 16/9;
+    background: #000;
+    overflow: hidden;
+    width: 100%;
+  }
+  .gate img { width: 100%; height: 100%; object-fit: cover; transition: filter 600ms ease; }
+  .gate img.gray, .still img.gray { filter: grayscale(0.78) brightness(0.96) contrast(0.86) saturate(0.2); }
+  .tc {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    color: var(--cream);
+    background: rgba(12, 11, 10, 0.55);
+    padding: 3px 6px;
+  }
+  .slate-flag, .still .flag {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--cream);
+    background: var(--red);
+    padding: 3px 6px;
+  }
+  .slate {
+    position: absolute;
+    left: 22px;
+    bottom: 20px;
+    right: 22px;
+  }
+  .slate strong {
+    display: block;
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 26px;
+    line-height: 1.25;
+    margin-bottom: 8px;
+  }
+  .slate span { font-family: var(--mono); font-size: 12px; color: var(--cream-2); }
+  .play {
+    position: absolute;
+    left: 14px;
+    bottom: 14px;
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--cream);
+    background: rgba(12, 11, 10, 0.4);
+    display: grid;
+    place-items: center;
+  }
+  .tri {
+    width: 0;
+    height: 0;
+    border-left: 11px solid var(--cream);
+    border-top: 7px solid transparent;
+    border-bottom: 7px solid transparent;
+    margin-left: 3px;
+  }
+  .pause { display: flex; gap: 4px; }
+  .pause i { width: 2px; height: 12px; background: var(--cream); display: block; }
+  .pullbar { position: absolute; left: 0; bottom: 0; height: 2px; width: 0; background: var(--red); }
+  .pulling .pullbar { width: 100%; transition: width 1.15s linear; }
+  .transport { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+  .scrub { flex: 1; height: 12px; display: flex; align-items: center; cursor: pointer; }
+  .scrub b { display: block; width: 100%; height: 2px; background: rgba(242, 236, 225, 0.2); position: relative; font-weight: 400; }
+  .scrub i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: var(--red); }
+  .transport .tc-read { font-family: var(--mono); font-size: 11px; color: var(--cream-2); }
+
+  .lower {
+    display: flex;
+    gap: 22px;
+    align-items: flex-start;
+    margin-top: 14px;
+  }
+  .strip-wrap {
+    flex: none;
+    background: #000;
+    border: 1px solid rgba(242, 236, 225, 0.2);
+    padding: 5px 7px 6px;
+    max-width: 100%;
+  }
+  .perfs {
+    height: 7px;
+    background: repeating-linear-gradient(90deg, #000 0 6px, rgba(242,236,225,0.42) 6px 11px, #000 11px 18px);
+  }
+  .strip { display: flex; gap: 6px; margin: 5px 0; }
+  .still {
+    width: 168px;
+    position: relative;
+    aspect-ratio: 16/9;
+    background: #000;
+    padding: 0;
+    border: 0;
+  }
+  .still img { width: 100%; height: 100%; object-fit: cover; }
+  .still.on { outline: 1px solid var(--red); outline-offset: 2px; }
+  .frame-note { min-width: 0; flex: 1; padding-top: 2px; }
+  .readout {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--cream-2);
+    margin-bottom: 8px;
+  }
+  .judgment { font-size: 14px; line-height: 1.6; color: var(--cream); max-width: 38em; }
+  .row-actions { display: flex; align-items: center; gap: 22px; margin-top: 12px; }
+  .qc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    border-top: 1px solid var(--line);
+    margin-top: 14px;
+    padding-top: 10px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--cream-2);
+  }
+  .qc b { font-weight: 400; color: var(--mute); margin-right: 6px; }
+
+  .page { max-width: 680px; }
+  .page h3 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 28px;
+    line-height: 1.25;
+    margin-bottom: 8px;
+  }
+  .page .dek { margin: 0 0 18px; max-width: 36em; }
+  .kv { width: 100%; border-collapse: collapse; }
+  .kv th, .kv td { border-top: 1px solid var(--line); padding: 9px 16px 9px 0; text-align: left; vertical-align: baseline; font-weight: 400; }
+  .kv th { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--mute); width: 88px; }
+  .kv td { font-size: 14px; }
+  .opt {
+    display: grid;
+    grid-template-columns: 22px minmax(0, 1fr);
+    gap: 10px;
+    width: 100%;
+    padding: 12px 0;
+    border-top: 1px solid var(--line);
+    color: var(--cream-2);
+    font-size: 14px;
+    line-height: 1.55;
+  }
+  .opt .k { font-family: var(--mono); color: var(--mute); }
+  .opt.on { color: var(--cream); }
+  .opt.on .k { color: var(--red); }
+  .why { margin: 12px 0 18px; color: var(--cream-2); font-size: 14px; line-height: 1.6; }
+  .shots { width: 100%; border-collapse: collapse; }
+  .shots td { border-top: 1px solid var(--line); padding: 8px 12px 8px 0; vertical-align: baseline; font-size: 13px; }
+  .shots td.t { font-family: var(--mono); font-size: 12px; color: var(--mute); width: 72px; }
+  .shots td.f { width: 52px; color: var(--cream); }
+  .cue {
+    margin-top: 16px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--mute);
+    line-height: 1.7;
+  }
+  .sheet {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 3px;
+    background: #000;
+    border: 1px solid var(--line-2);
+    padding: 3px;
+    max-width: 760px;
+  }
+  .sheet figure { margin: 0; background: #000; }
+  .sheet img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
+  .sheet figcaption {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--mute);
+    padding: 4px 2px 6px;
+  }
+  .vers { width: min(100%, 760px); border-collapse: collapse; margin-top: 14px; }
+  .vers td { border-top: 1px solid var(--line); padding: 8px 14px 8px 0; font-size: 13px; }
+  .vers td.m { font-family: var(--mono); font-size: 12px; color: var(--cream-2); }
+  .vers tr.on td { color: var(--cream); }
+  .vers button { color: inherit; }
+  .vers .sq { width: 6px; height: 6px; border: 1px solid var(--mute); display: inline-block; margin-right: 8px; vertical-align: 1px; }
+  .vers tr.on .sq { background: var(--red); border-color: var(--red); }
+
+  .dock { border-left: 1px solid var(--line); background: #100e0c; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+  .vert {
+    display: none;
+    width: 100%;
+    height: 100%;
+    writing-mode: vertical-rl;
+    font-family: var(--serif);
+    font-size: 16px;
+    letter-spacing: 0.42em;
+    padding-top: 20px;
+    align-items: center;
+    color: var(--cream);
+  }
+  .dock.shut .vert { display: flex; }
+  .dock.shut .dock-main { display: none; }
+  .dock-main { display: flex; flex-direction: column; min-height: 0; height: 100%; }
+  .dock-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid var(--line);
+  }
+  .dock-head h2 { font-family: var(--serif); font-weight: 400; font-size: 20px; }
+  .dock-head button { font-size: 12px; color: var(--mute); }
+  .dock-head button:hover { color: var(--cream); }
+  .ctx { padding: 12px 16px; border-bottom: 1px solid var(--line); }
+  .ctx .ft { font-family: var(--serif); font-size: 16px; line-height: 1.35; }
+  .ctx .sub { margin-top: 4px; font-family: var(--mono); font-size: 11px; color: var(--mute); }
+  .notes { flex: 1; overflow: auto; padding: 4px 16px 8px; min-height: 0; }
+  .note { padding: 11px 0; border-bottom: 1px solid var(--line); }
+  .note .who {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    color: var(--mute);
+    margin-bottom: 5px;
+  }
+  .note.dir .who { color: var(--red); }
+  .note p { font-size: 13.5px; line-height: 1.65; color: var(--cream); }
+  .acts { border-top: 1px solid var(--line); padding: 6px 8px; }
+  .acts button {
+    display: block;
+    width: 100%;
+    color: var(--cream-2);
+    font-size: 13px;
+    line-height: 1.45;
+    padding: 6px 4px;
+  }
+  .acts button::before {
+    content: "";
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    margin-right: 8px;
+    border: 1px solid var(--mute);
+    vertical-align: 1px;
+  }
+  .acts button:hover { color: var(--cream); }
+  .acts button:hover::before { background: var(--red); border-color: var(--red); }
+  .composer { display: flex; border-top: 1px solid var(--line); }
+  .composer input { flex: 1; padding: 12px; font-size: 13px; min-width: 0; }
+  .composer button { color: var(--red); font-size: 13px; padding: 0 12px; flex: none; }
+
+  .light {
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    background: rgba(12, 11, 10, 0.94);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 36px 40px;
+    gap: 14px;
+  }
+  .light img { width: min(1100px, 92vw); aspect-ratio: 16/9; object-fit: cover; background: #000; }
+  .light .row { width: min(1100px, 92vw); display: flex; justify-content: space-between; gap: 18px; align-items: baseline; }
+  .light .row p { font-size: 14px; line-height: 1.55; }
+  .light .tc2 { font-family: var(--mono); font-size: 12px; color: var(--cream-2); }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes stagein {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: none; }
+  }
+  @media (max-width: 1360px) {
+    :root { --pad: 28px; --rail: 124px; --dock: 252px; }
+    .mast h1 { font-size: 60px; }
+    .catalog { grid-template-columns: 164px minmax(0, 1fr); gap: 24px; }
+    .sec-head h2 { font-size: 24px; }
+    .cap .cn { font-size: 20px; }
+    .form-col { padding: 24px 28px 22px 18px; }
+    .still { width: 148px; }
+    .stage { padding: 14px 16px 12px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const STYLES = [{"slug":"crayon-book","num":"01","en":"Crayon Picture Book","cn":"蜡笔儿童绘本","cat":"手绘与绘画","line":"月亮失眠了，小女孩爬上屋顶给它唱摇篮曲。","dur":52,"uses":["Picture books","Bedtime stories","Kids' learning"],"film":"The Moon Can't Sleep"},{"slug":"watercolor","num":"02","en":"Watercolor Brush","cn":"水彩笔刷","cat":"手绘与绘画","line":"跟着降雨从澳洲红色腹地一路画到绿色海岸，一镜到底。","dur":113.6,"uses":["Nature documentary","Travel","Science explainers"],"film":"Follow the Rain"},{"slug":"ink-wash","num":"03","en":"Chinese Ink Wash","cn":"中国水墨","cat":"手绘与绘画","line":"侠客踏水过江，一剑断流。","dur":48,"uses":["Wuxia","Cultural brands","Poetry"],"film":"The Swordsman and the River"},{"slug":"impasto","num":"04","en":"Impasto Oil Painting","cn":"油画厚涂","cat":"手绘与绘画","line":"灰色雨中广场，第一把红伞撑开，圆舞曲把整个广场刷上颜色。","dur":39.7,"uses":["Music videos","Art & culture","Emotional ads"],"film":"The Colour of Rain"},{"slug":"one-line","num":"05","en":"One-line Drawing","cn":"一笔画","cat":"手绘与绘画","line":"一根不离纸的线画完一个人的一生，再把笔交给孩子。","dur":47.5,"uses":["Brand stories","Life milestones","Minimal ads"],"film":"The Line That Never Lifted"},{"slug":"whiteboard","num":"06","en":"Whiteboard Explainer","cn":"白板讲解","cat":"手绘与绘画","line":"手机怎么知道你在哪：GPS、原子钟，和相对论每天多出的 38 微秒。","dur":111,"uses":["Explainers","Online courses","Science"],"film":"Einstein in Your Pocket"},{"slug":"shadow-puppet","num":"07","en":"Shadow Puppetry","cn":"皮影戏","cat":"东方传统","line":"十日炙烤大地，后羿张弓射日。","dur":54.4,"uses":["Myths & folklore","Heritage","Festivals"],"film":"Hou Yi Shoots the Suns"},{"slug":"ukiyoe","num":"08","en":"Ukiyo-e","cn":"浮世绘","cat":"东方传统","line":"旅人走向远山，每个镜头都是一幅版画；巨浪是高潮，结尾是远山与整幅画轴拉远。","dur":44,"uses":["Travel","Japanese culture","Poetry"],"film":"Toward the Mountain"},{"slug":"papercut-red","num":"09","en":"Red Paper-cut","cn":"红色窗花剪纸","cat":"东方传统","line":"除夕年兽进村，小女孩剪出的大窗花照亮全村，把它吓跑。","dur":49,"uses":["Lunar New Year","Festive greetings","Folk tales"],"film":"Nian Comes to Town"},{"slug":"paper-lantern","num":"10","en":"Paper-cut Lightbox","cn":"纸雕灯影","cat":"东方传统","line":"一枚月饼讲中秋的团圆与思念，纸雕灯箱层层透光。","dur":121.8,"uses":["Festivals","Gift brands","Cultural stories"],"film":"A Mooncake's Longing"},{"slug":"risograph","num":"12","en":"Risograph Print","cn":"Risograph 孔版印刷","cat":"印刷与版画","line":"周日早晨骑车穿过城市：面包店、公园、河边，每到一处加一版油墨，最后三版套印。","dur":40,"uses":["Indie brands","Zines","Lifestyle"],"film":"Sunday Ride"},{"slug":"halftone-dossier","num":"13","en":"Halftone Dossier","cn":"复古半调案卷","cat":"印刷与版画","line":"橘猫胖橘被立案审查：测试重力、凌晨跑酷，最后无罪释放。","dur":30,"uses":["Humour","Pet content","Social shorts"],"film":"Case File: Chubby"},{"slug":"woodcut","num":"15","en":"Woodcut Print","cn":"木刻版画","cat":"印刷与版画","line":"村子用一整个冬天铸一口钟，钟声第一次响起，雪停了。","dur":58.5,"uses":["Folk tales","Craft brands","Book trailers"],"film":"The Bell Founder"},{"slug":"swiss-motion","num":"16","en":"Swiss Motion Graphics","cn":"瑞士动态排版","cat":"图形与排版","line":"一张音乐会海报按瑞士设计的五条规则自己排版，第五条是只打破一条。","dur":44,"uses":["Brand identity","Events","Design education"],"film":"Five Rules for a Poster"},{"slug":"spy-titles","num":"17","en":"60s Spy Title Sequence","cn":"60s 间谍片头","cat":"图形与排版","line":"虚构 1964 年间谍片的片头：追一把被偷的钥匙，几何碎片最后拼成片名。","dur":44.1,"uses":["Title sequences","Event openers","Trailers"],"film":"The Velvet Cipher"},{"slug":"art-deco","num":"18","en":"Art Deco","cn":"装饰艺术","cat":"图形与排版","line":"1930 年的大饭店，门童赶在午夜前把一封信送上顶楼。","dur":58.4,"uses":["Luxury & hospitality","Galas","Invitations"],"film":"Midnight at the Starlight Hotel"},{"slug":"blueprint","num":"19","en":"Blueprint","cn":"蓝图 / 工程制图","cat":"图形与排版","line":"发明家的蓝图自己画出一台接云机器，修订云线变成了真的雨云。","dur":46.7,"uses":["Engineering","Hardware launches","Tech explainers"],"film":"Patent Pending: The Cloud Catcher"},{"slug":"stained-glass","num":"20","en":"Stained Glass","cn":"彩色玻璃窗","cat":"图形与排版","line":"阳光从清晨移到黄昏，照到哪一格花窗，哪一格的故事就动起来。","dur":56.5,"uses":["Legends","Heritage","Holiday stories"],"film":"The Dragon of the East Window"},{"slug":"pictogram-motion","num":"21","en":"Pictogram Motion","cn":"象形运动图形","cat":"图形与排版","line":"2026 亚运会 43 个大项，几何象形人卡着节拍快闪。","dur":163.6,"uses":["Sports events","Visual identity","Event openers"],"film":"Aichi-Nagoya 2026 — All 43 Sports"},{"slug":"ascii-crt","num":"22","en":"ASCII / CRT Terminal","cn":"ASCII / CRT 终端","cat":"图形与排版","line":"月球基地的 AI 沉睡 40 年后被唤醒，用字符画出“家”来回复。","dur":59.8,"uses":["Developer tools","Sci-fi","Tech brands"],"film":"Tranquility.log"},{"slug":"dataviz","num":"23","en":"Data Storytelling","cn":"数据叙事","cat":"信息与发布","line":"一百年的夏季气温，图表本身就是故事。","dur":50,"uses":["Data journalism","Reports","Climate & science"],"film":"A Hundred Summers"},{"slug":"iso-infographic","num":"24","en":"Isometric Infographic","cn":"等距信息图","cat":"信息与发布","line":"一杯咖啡从种植园到你手里的旅程。","dur":58.8,"uses":["Process explainers","Supply chains","Annual reports"],"film":"From Bean to Cup"},{"slug":"dark-keynote","num":"25","en":"Dark Tech Keynote","cn":"暗色科技发布","cat":"信息与发布","line":"虚构 app Tidy 的发布片：被埋掉的光标一键把几百个窗口归位。","dur":42,"uses":["Product launches","SaaS","Keynotes"],"film":"Room to Think"},{"slug":"rubber-hose","num":"26","en":"1930s Rubber Hose Cartoon","cn":"1930s 橡皮管卡通","cat":"卡通与动画","line":"一只咖啡杯满厨房追一块逃跑的方糖。","dur":50,"uses":["Food & drink","Retro ads","Kids"],"film":"Coffee Cup Chase"},{"slug":"cel-anime-80s","num":"27","en":"80s Cel Anime","cn":"80 年代赛璐璐动画","cat":"卡通与动画","line":"快递少女骑车穿过雨后霓虹都市，赶在黎明发射前送到一盘磁带。","dur":59,"uses":["Music videos","Game trailers","Nostalgia"],"film":"City Lights, 1987"},{"slug":"scifi-toon","num":"28","en":"Sci-Fi Sitcom Toon","cn":"科幻情景喜剧卡通","cat":"卡通与动画","line":"厌世天才开传送门只想买杯咖啡，却穿过越来越离谱的平行宇宙。","dur":57.5,"uses":["Comedy","Tech brands","Social shorts"],"film":"Coffee Run"},{"slug":"pixel-rpg","num":"29","en":"16-bit Pixel RPG","cn":"16-bit 像素 RPG","cat":"游戏","line":"勇士在最终 Boss 门前存档，存档画面闪回一路冒险。","dur":54.5,"uses":["Game trailers","Recaps","Nostalgia"],"film":"The Last Save Point"},{"slug":"hd-2d","num":"31","en":"HD-2D","cn":"HD-2D","cat":"游戏","line":"灯塔熄灭，孙女提着最后一簇火穿过夜林、爬上风暴悬崖。","dur":76.5,"uses":["Game trailers","Fantasy","Story films"],"film":"The Lampbearer"},{"slug":"microgame","num":"32","en":"Microgame Frenzy","cn":"微游戏快闪","cat":"游戏","line":"见习宇航员闯五秒训练营，越来越快，Boss 关亲手降落回地球。","dur":59.8,"uses":["Game trailers","Onboarding","Social shorts"],"film":"Five-Second Astronaut"},{"slug":"game-show","num":"33","en":"Game Show Flat","cn":"综艺节奏扁平","cat":"游戏","line":"把 AI 发展史做成一局节奏游戏，模型踩着拍登场，最后发成绩单。","dur":148.8,"uses":["Tech timelines","Year in review","Variety shows"],"film":"Rhythm of AI, 1997 → 2026"},{"slug":"silent-film","num":"34","en":"1920s Silent Film","cn":"1920s 默片","cat":"电影与时代","line":"面包店学徒追一个滚走的面包，最后掰成两半分给饿肚子的小女孩。","dur":54.2,"uses":["Comedy","Retro brands","Silent storytelling"],"film":"The Runaway Loaf"},{"slug":"backrooms","num":"36","en":"Liminal Found Footage","cn":"后室 / 新怪谈","cat":"电影与时代","line":"新夜班员工拍下入职第一晚：无尽的黄色办公空间，和墙上的员工守则。","dur":59.7,"uses":["Horror","Mystery & ARG","Game teasers"],"film":"Night Shift Orientation"},{"slug":"brick-toy","num":"37","en":"Brick Toy","cn":"积木玩具","cat":"材质与 3D","line":"积木宇航员用零件拼出火箭，飞向积木月亮。","dur":54,"uses":["Toys & kids","Product builds","Space"],"film":"Rocket from Spare Parts"},{"slug":"paper-popup","num":"41","en":"Paper Pop-up Book","cn":"纸片立体书","cat":"材质与 3D","line":"立体书在书桌上打开，小精灵 Pip 在纸片世界冒险，最后跳出书外。","dur":133,"uses":["Children's books","Game trailers","Story films"],"film":"Pip's Paper Adventure"},{"slug":"tilt-shift","num":"42","en":"Tilt-Shift Miniature","cn":"移轴微缩","cat":"材质与 3D","line":"玩具城的早高峰，一切都像模型。","dur":38,"uses":["City promos","Real estate","Transport"],"film":"Toy Town Rush Hour"},{"slug":"lowpoly-island","num":"43","en":"Low-poly Isometric Island","cn":"低多边形等距","cat":"材质与 3D","line":"空海里一格格长出小岛和村庄，每放一块响一个音符，直到星空。","dur":53,"uses":["Game trailers","World building","Calm content"],"film":"The Island That Grew"},{"slug":"glass-product","num":"44","en":"Glass Product Render","cn":"玻璃质感产品","cat":"材质与 3D","line":"虚构玻璃耳机 Aura 的开箱与特写。","dur":32,"uses":["Product launches","Consumer tech","Beauty"],"film":"Aura — Hear the Light"},{"slug":"urban-sketch","num":"45","en":"Urban Sketch · Pen & Wash","cn":"钢笔淡彩","cat":"手绘与绘画","line":"公园只是一张钢笔速写，风把草帽吹到哪里，哪里才有颜色。","dur":32.4,"uses":["City & travel","Architecture","Lifestyle brands"],"film":"Where the Wind Went"},{"slug":"living-screencast","num":"46","en":"Living Screencast","cn":"活体实机录屏","cat":"信息与发布","line":"像素小人 Clawd 搬进 Claude 应用，一镜到底演示 Plan 模式和自检。","dur":59.4,"uses":["Product tutorials","Feature launches","Onboarding"],"film":"Clawd Moves In"},{"slug":"midcentury-toon","num":"48","en":"Mid-century Cartoon","cn":"50s 扁平卡通","cat":"卡通与动画","line":"用 50 年代教育片的口吻，三步教你装好一台扫地机。","dur":40,"uses":["Set-up guides","Help centres","How-to"],"film":"Meet Pip"},{"slug":"hologram-hud","num":"52","en":"Sci-fi Hologram HUD","cn":"科幻全息界面","cat":"信息与发布","line":"电助力车被扫描成全息线框，目标框依次锁定电池、电机、刹车。","dur":39,"uses":["Spec walkthroughs","Launch videos","Trade shows"],"film":"Volt · Spec Scan"},{"slug":"engraving","num":"53","en":"Copperplate Engraving","cn":"铜版画","cat":"印刷与版画","line":"一张博物志图版自己刻出来：雕刀推开铜版，蜜蜂一线线成形，最后手工水彩上色。","dur":40,"uses":["Museum labels","Science explainers","Brand heritage"],"film":"The Honeybee, Plate VII"},{"slug":"silkscreen-poster","num":"54","en":"Silkscreen Travel Poster","cn":"丝印旅行海报","cat":"印刷与版画","line":"三条步道各一张丝印海报，一色一刮印出来，再沿山脊一镜到底从正午爬到黄昏。","dur":38.4,"uses":["Destination guides","Tourism","Event posters"],"film":"Three Trails"},{"slug":"satellite-briefing","num":"55","en":"Satellite Briefing","cn":"卫星简报","cat":"实证影像","line":"卫星照着地图去找咸海，找到的是沙漠；只有筑了坝的那一块回来了。","dur":37.8,"uses":["Climate","News explainers","Geography"],"film":"The Map Still Says Sea"},{"slug":"briefing-board","num":"56","en":"Engineering Briefing Board","cn":"工程简报板","cat":"实证影像","line":"一条河要架桥，四种桥型在一面简报墙上逐个受检，拍板的是桥下要过的船。","dur":40,"uses":["Engineering","Option comparisons","Briefings"],"film":"The Ship Decides"},{"slug":"lidar-survey","num":"57","en":"LiDAR Survey","cn":"点云测绘","cat":"实证影像","line":"激光点云剥掉一片森林的树冠，露出当年农田的石墙：3.4 公里。","dur":40,"uses":["Heritage","Environment","Site surveys"],"film":"The Fields Under the Forest"},{"slug":"white-model","num":"58","en":"Projection on White Model","cn":"白模投影","cat":"实证影像","line":"投影机把数据一层层刷上鹿特丹白模：从 1940 年的空洞到今天的塔楼。","dur":40,"uses":["Urban planning","Exhibitions","City data"],"film":"How a Flattened City Grew Back"},{"slug":"data-physical","num":"59","en":"Data Physicalization","cn":"数据实物化","cat":"实证影像","line":"十二年风电和太阳能装机叠成实物，绕表盘升成两条螺旋，2021 年太阳能反超。","dur":39.4,"uses":["Annual reports","Investor decks","Energy data"],"film":"Two Spirals"},{"slug":"teardown","num":"60","en":"Exploded Teardown","cn":"产品拆解","cat":"实证影像","line":"开源键盘的一半在一次环绕中逐层拆开，看到主控再合拢，标上真实尺寸。","dur":38.8,"uses":["Hardware launches","Product pages","Spec explainers"],"film":"21 Keys, Opened"},{"slug":"microscope","num":"61","en":"Microscope Story","cn":"显微叙事","cat":"实证影像","line":"一镜从肝组织玻片推到单个细胞核，两个圆逐像素数出 2.4 倍的蓝。","dur":39.5,"uses":["Biomedicine","Materials science","Skincare science"],"film":"Measured Blue"},{"slug":"archive-lighttable","num":"62","en":"Archive Light Table","cn":"档案灯台","cat":"实证影像","line":"电报说最长飞了 57 秒；放大镜下，莱特兄弟的底片和档案说是 59 秒。","dur":40,"uses":["Brand history","Archive stories","Museums"],"film":"Two Seconds Short"},{"slug":"caption-news","num":"63","en":"Caption News","cn":"字幕新闻","cat":"剪辑与纪实","line":"美国一年死掉 130 万箱蜜蜂，总数却涨了 6%：静音也能看懂的新闻。","dur":59.5,"uses":["Social news","Report explainers","Data shorts"],"film":"The Bee Ledger"},{"slug":"newsreel","num":"64","en":"1920s Newsreel","cn":"1920s 新闻影片","cat":"剪辑与纪实","line":"1926 年报纸说查尔斯顿会跳坏膝盖，福特工人野餐会上的孩子照跳不误。","dur":54.6,"uses":["History stories","Fads & eras","Anniversaries"],"film":"Knock-Knee Alert"},{"slug":"countdown","num":"65","en":"Live Countdown Split-screen","cn":"实时倒计时分屏","cat":"剪辑与纪实","line":"阿尔忒弥斯二号发射的最后一分钟，一秒不剪：格子从 1 开到 9，点火合成 1。","dur":59.5,"uses":["Launches","Countdowns","Live events"],"film":"Counting Itself Down"},{"slug":"city-symphony","num":"66","en":"Time-lapse Symphony","cn":"延时交响","cat":"剪辑与纪实","line":"纽约的一天：延时光河、踩着十六分音符的网格，1899 年和今天并排。","dur":52,"uses":["City films","Music montages","Openers"],"film":"One Day in New York"},{"slug":"visual-investigation","num":"67","en":"Visual Investigation","cn":"视觉调查","cat":"剪辑与纪实","line":"新闻片、照片、证词和调查报告排上同一条时间轴，五路来源指向一处。","dur":60,"uses":["Reconstructions","Fact-checks","Incident reports"],"film":"The Hindenburg: Four Minutes, 32 Seconds"},{"slug":"kino-montage","num":"68","en":"Constructivist Montage","cn":"构成主义蒙太奇","cat":"剪辑与纪实","line":"帝国大厦的小册子写着建造者，工地实拍和老照片给出答案：每天 2,500 人。","dur":60,"uses":["Industry histories","Milestones","Collective effort"],"film":"410 Days"},{"slug":"telestrator","num":"69","en":"Sports Telestrator","cn":"体育战术板","cat":"剪辑与纪实","line":"半场 0–3，费内巴切 12 分钟连进三球：冻住画面、画线、分屏、射门图。","dur":54.4,"uses":["Sports analysis","Match recaps","Coaching"],"film":"Freeze Frame"},{"slug":"news-package","num":"70","en":"Broadcast News Package","cn":"电视新闻包装","cat":"剪辑与纪实","line":"一周四条 AI 新闻，一整套电视台包装：串联单、标题条、翻牌价格表、规格卡。","dur":53.5,"uses":["News round-ups","Bulletins","Market updates"],"film":"The Week in AI"},{"slug":"memphis-diorama","num":"71","en":"Memphis Diorama","cn":"孟菲斯微缩景观","cat":"材质与 3D","line":"一个河湾一镜过完四季，大树一蹲一弹，就换一季。","dur":45,"uses":["Web heroes","Ambient loops","Seasons"],"film":"Four Seasons in Pomelo Town"},{"slug":"transit-map","num":"72","en":"Transit Map","cn":"地铁线路图","cat":"信息与发布","line":"一张纸上的线路图，从 1993 年的 6 公里长到 21 条线、906 公里。","dur":47,"uses":["Transport","Growth over time","Networks"],"film":"6 Kilometres"},{"slug":"chalkboard","num":"73","en":"Chalkboard","cn":"黑板粉笔","cat":"手绘与绘画","line":"粉笔写下网上的说法，再一擦，把「射」写回三千年前。","dur":49.3,"uses":["Word origins","Myth-busting","Lessons"],"film":"The Story of Chinese Characters"},{"slug":"isometric-picture-book","num":"74","en":"Isometric Picture Book","cn":"等距绘本","cat":"信息与发布","line":"等距的登机口和机舱里，小人按顺序登机，讲清哪种叫法快将近一半。","dur":59.8,"uses":["Everyday rules","Queues","Comparisons"],"film":"Seventy-Two Seats"},{"slug":"printed-long-take","num":"75","en":"Printed Long Take","cn":"印刷长镜头","cat":"印刷与版画","line":"刮版画的北海道河谷一镜到底，丹顶鹤从 33 只数回到 1,927 只。","dur":60,"uses":["Journeys","Wildlife","Landscapes"],"film":"Thirty-Three Cranes"},{"slug":"circuit-board","num":"76","en":"Circuit Board","cn":"电路板","cat":"信息与发布","line":"江河变成电路板上的走线，电流从水坝跑 2,080 公里进手机充电器。","dur":60,"uses":["Energy","Supply chains","Devices"],"film":"Seven Milliseconds"},{"slug":"desktop-flythrough","num":"77","en":"Desktop Flythrough","cn":"桌面穿梭","cat":"材质与 3D","line":"一张猫照片跳过桌上的应用卡片，从一台手机飞到朋友手机里，一镜跟到底。","dur":60,"uses":["App explainers","Workflows","Products"],"film":"Before the Ding"}];
+const CATS = ["手绘与绘画","东方传统","印刷与版画","图形与排版","信息与发布","卡通与动画","游戏","电影与时代","材质与 3D","实证影像","剪辑与纪实"];
+const STAGES = [
+  { id: "brief", n: "01", name: "简报" },
+  { id: "treatment", n: "02", name: "Treatment" },
+  { id: "frames", n: "03", name: "风格帧" },
+  { id: "story", n: "04", name: "分镜" },
+  { id: "sound", n: "05", name: "声音" },
+  { id: "delivery", n: "06", name: "成片" }
+];
+const ACTS = ["写 Treatment","按 STYLE.md 做 3 张风格帧","这一帧太灰，改","按分镜表接时间轴","检查字幕停留","渲染草稿"];
+const CROPS = ["22% 70%","64% 32%","40% 48%","18% 40%","72% 60%","50% 24%"];
+
+const state = {
+  screen: "gallery",
+  cat: "全部",
+  q: "",
+  style: null,
+  idea: "",
+  lang: "中文",
+  dur: 45,
+  voice: true,
+  story: false,
+  advOpen: false,
+  ideaError: false,
+  drafts: {},
+  films: [],
+  film: null,
+  status: "",
+  pulling: false,
+  rendering: false,
+  playTimer: null
+};
+let pullToken = 0;
+let renderToken = 0;
+
+function esc(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+function book(t) { return "《" + t + "》"; }
+function sizeTitle(input) {
+  if (!input) return;
+  const s = document.createElement("span");
+  s.textContent = input.value || "片";
+  s.style.cssText = "position:fixed;left:-999px;top:0;white-space:pre;font-family:Songti SC,STSong,serif;font-size:22px";
+  document.body.appendChild(s);
+  input.style.width = Math.min(s.offsetWidth + 8, 320) + "px";
+  s.remove();
+}
+function fmtDur(sec) {
+  const s = Math.round(Number(sec) || 0);
+  return String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
+}
+function fmtTC(sec) {
+  const s = Math.max(0, Number(sec) || 0);
+  const m = Math.floor(s / 60);
+  const ss = Math.floor(s % 60);
+  const ff = Math.floor((s % 1) * 24);
+  return String(m).padStart(2, "0") + ":" + String(ss).padStart(2, "0") + ":" + String(ff).padStart(2, "0");
+}
+function styleOf(film) { return STYLES.find(s => s.slug === film.slug) || STYLES[0]; }
+function stageName(id) { return (STAGES.find(s => s.id === id) || STAGES[0]).name; }
+function stageNo(id) { return (STAGES.find(s => s.id === id) || STAGES[0]).n; }
+function allCats() {
+  const extra = [];
+  for (const s of STYLES) if (!CATS.includes(s.cat) && !extra.includes(s.cat)) extra.push(s.cat);
+  return CATS.concat(extra);
+}
+function catCount(cat) { return STYLES.filter(s => s.cat === cat).length; }
+function catIx(cat) { const i = allCats().indexOf(cat); return String((i < 0 ? 0 : i) + 1).padStart(2, "0"); }
+function poster(slug) { return "../../assets/posters/" + slug + ".jpg"; }
+function projectPath(film) { return "~/Lemo/" + film.title; }
+
+function ideaFor(s) {
+  if (s.slug === "watercolor") return "退潮之后，湿沙上还留着上一波的纹路。想用水彩把这一小时画完：从特写的湿沙，到海平线慢慢退远。中文，有旁白。";
+  return "想用" + s.cn + "拍这个：" + s.line + "控制在一分钟内，开头三秒就要让人看懂。";
+}
+function tideTreatment() {
+  return {
+    logline: "退潮后的湿沙，用四十五秒画完海把纹路交还给岸。",
+    chosen: "B",
+    why: "开头三秒必须有东西可看。全景推入是这支水彩最容易滑进去的套子。",
+    options: [
+      ["A", "从全景推入。海平线先在，退潮是风景，人要等。"],
+      ["B", "湿沙特写先行。第二秒才拉开到海面。"],
+      ["C", "倒着讲。先给干沙的裂纹，再回到水还在的时候。"]
+    ],
+    shots: [
+      ["00:00", "特写", "湿沙，泡沫最后爬上一寸。三秒内让人知道这是退潮。"],
+      ["00:02", "拉开", "海平线。远山只是一笔，不能抢沙。"],
+      ["00:08", "中景", "浪尖留白。纸白不能被罩染吃掉。"],
+      ["00:28", "远景", "雨线变疏，海岸露出来。"],
+      ["00:45", "落幅", "纸还湿着。呼应开头那一寸泡沫。"]
+    ],
+    cue: "节拍  72 · 旁白在第二秒之后才进\n声音  潮水垫底，两处近乎静默：拉开之前，落幅之前\n字幕  中文烧在画面里，不压湿沙"
+  };
+}
+function makeTreatment(style, idea) {
+  if (style.slug === "watercolor" && /退潮|湿沙|潮水/.test(idea)) return tideTreatment();
+  return {
+    logline: idea.replace(/[。！？].*$/, "。"),
+    chosen: "B",
+    why: "B 的开头三秒有东西可看。顺着画法的习惯从全景讲起，通常就是套子。",
+    options: [
+      ["A", "顺着一句讲完。" + style.line + "开头就是结果，后面补原因。"],
+      ["B", "先给一个三秒能看懂的特写，第二秒再拉开。不从全景慢慢推。"],
+      ["C", "倒着讲。先看到结尾的静物，再回到动作发生之前。"]
+    ],
+    shots: [
+      ["00:00", "特写", "三秒内让人知道这是什么。"],
+      ["00:02", "拉开", "把特写放回场面。"],
+      ["00:18", "中景", "转折只发生一次。"],
+      [fmtDur(Math.max(30, style.dur > 60 ? 45 : 40)), "落幅", "呼应开头那张特写。"]
+    ],
+    cue: "节拍  先不定死，等镜头表落了再锁\n声音  " + (state.voice ? "有旁白，人声进来之前留一拍静" : "不要旁白，动作自己出声") + "\n字幕  " + state.lang
+  };
+}
+function makeFrames(film, revise) {
+  const times = [2, Math.min(8, Math.max(4, film.dur * 0.28)), Math.min(film.dur - 1, Math.max(10, film.dur * 0.68))];
+  return times.map((t, i) => ({
+    t: t,
+    crop: CROPS[i],
+    status: revise && i === 1 ? "revise" : "ok",
+    gray: !!(revise && i === 1),
+    note: revise && i === 1 ? "中间灰了一层，纸色不干净。" : (i === 0 ? "开头这张能看懂，留白还在。" : "落幅稳住了。这一张可以留。")
+  }));
+}
+
+function seed() {
+  state.films = [
+    {
+      id: "tide",
+      title: "潮水退去之前",
+      slug: "watercolor",
+      dur: 45,
+      lang: "中文",
+      voice: true,
+      story: false,
+      idea: "退潮之后，湿沙上还留着上一波的纹路。想用水彩把这一小时画完：从特写的湿沙，到海平线慢慢退远。中文，有旁白。",
+      stage: "frames",
+      done: ["brief", "treatment"],
+      frame: 1,
+      rerolled: false,
+      rendered: false,
+      delivered: false,
+      playhead: 0,
+      playing: false,
+      version: 0,
+      versions: [],
+      lufs: "",
+      sheet: false,
+      boot: false,
+      frames: [
+        { t: 2, crop: "50% 78%", status: "ok", gray: false, note: "湿沙特写。泡沫还在纸上，留白干净。" },
+        { t: 8, crop: "62% 30%", status: "revise", gray: true, note: "纸白被罩染吃掉了，海面看不出层次。" },
+        { t: 28, crop: "34% 46%", status: "ok", gray: false, note: "远山一笔，海平线稳住。这一张可以留。" }
+      ],
+      treatment: tideTreatment(),
+      messages: [
+        { who: "你", dir: false, text: "开头三秒不够抓人。" },
+        { who: "导演", dir: true, text: "现在是从全景推入。改成先给一个退潮后的湿沙特写，第二秒才拉开。改的是 film.js 的镜头表，不动风格。" },
+        { who: "你", dir: false, text: "第二张太灰了，海面看不出层次。" },
+        { who: "导演", dir: true, text: "第 2 帧的问题在纸白被水彩罩染吃掉了。我把远山的罩染降一档、浪尖留白提回来，再抽 3 张。时间轴不动。" }
+      ]
+    },
+    {
+      id: "neighbor",
+      title: "墙里的邻居",
+      slug: "crayon-book",
+      dur: 45,
+      lang: "中文",
+      voice: true,
+      story: true,
+      idea: "隔壁的灯先灭。小孩用蜡笔在墙上画了一扇窗，窗里有一个也睡不着的人。月亮还没睡，她爬上屋顶给两边唱同一句。",
+      stage: "delivery",
+      done: ["brief", "treatment", "frames", "story", "sound", "delivery"],
+      frame: 0,
+      rerolled: true,
+      rendered: true,
+      delivered: true,
+      playhead: 0,
+      playing: false,
+      version: 1,
+      lufs: "−14.1",
+      sheet: true,
+      boot: false,
+      versions: [
+        { name: "草稿", ver: "v3", lufs: "−16.4", render: "2 分 04 秒" },
+        { name: "成片", ver: "v4", lufs: "−14.1", render: "2 分 18 秒" },
+        { name: "交付", ver: "v4", lufs: "−14.1", render: "已交" }
+      ],
+      frames: [
+        { t: 3, crop: "28% 72%", status: "ok", gray: false, note: "屋顶和烟囱，蜡笔颗粒还在。小孩看得清。" },
+        { t: 14, crop: "68% 28%", status: "ok", gray: false, note: "月亮的脸占了画面右侧。表情读得清。" },
+        { t: 36, crop: "46% 40%", status: "ok", gray: false, note: "落幅。星星没有抢小孩。" }
+      ],
+      treatment: {
+        logline: "灯先灭，小孩在墙上画一扇窗，再爬上屋顶给月亮和邻居唱同一句。",
+        chosen: "B",
+        why: "先给屋顶上的小孩，不从满天星星慢慢摇。星星是背景，不是主角。",
+        options: [
+          ["A", "从星空全景摇到屋顶。好看，但三秒里没有人。"],
+          ["B", "先给屋顶上的小孩，第二秒月亮才转过来。"],
+          ["C", "从墙里那扇蜡笔窗开始，再拉出屋子和夜。"]
+        ],
+        shots: [
+          ["00:00", "中景", "小孩坐在屋顶，蜡笔屋顶占下三分之一。"],
+          ["00:02", "拉开", "月亮转过来，脸要读得清。"],
+          ["00:16", "特写", "墙上那扇窗，窗里有一个也睡不着的人。"],
+          ["00:32", "中景", "她开口。字幕不压屋顶。"],
+          ["00:45", "落幅", "灯还是灭的。月亮没睡，但安静了。"]
+        ],
+        cue: "节拍  蜡笔刮纸当节奏，不另铺钢琴\n声音  灯灭是第一声，开口之前有一拍静\n字幕  6 条，每条不少于 1.8 秒"
+      },
+      messages: [
+        { who: "导演", dir: true, text: "这一版可以交。响度 −14.1 LUFS，6 条字幕都过了停留，没有黑帧。字幕没有压住屋顶上的小孩。" }
+      ]
+    }
+  ];
+}
+
+function filmStatus(film) {
+  if (film.delivered && film.stage === "delivery" && !state.rendering) {
+    const cur = film.versions[film.version];
+    if (cur && cur.name === "交付") return "已交付 · " + film.lufs + " LUFS";
+    if (cur && cur.name === "成片") return "已交付 · " + film.lufs + " LUFS";
+  }
+  if (film.stage === "frames" && film.frames && film.frames.some(f => f.status === "revise")) return "风格帧 · 第 2 帧待改";
+  if (film.stage === "frames" && film.rerolled) return "风格帧 · 已重抽";
+  if (film.rendered && film.stage === "delivery") return "成片 · 草稿";
+  return stageName(film.stage);
+}
+function isLive(film) {
+  return !(film.delivered && film.stage === "delivery");
+}
+function dirty(film) {
+  return !!(film.frames && film.frames.some(f => f.status === "revise"));
+}
+function qcItems(film) {
+  if (film.delivered && film.versions[film.version] && film.versions[film.version].name !== "草稿") {
+    return [["readcheck", "通过 · 6 条字幕"], ["响度", film.lufs + " LUFS"], ["规格", fmtDur(film.dur) + " / 24fps"], ["渲染", "2 分 18 秒"], ["黑帧", "无"], ["字幕", "无遮挡"]];
+  }
+  const frameNote = !film.frames ? "未抽" : (dirty(film) ? "第 2 帧偏灰" : (film.rerolled ? "第 2 帧已改" : "三张可看"));
+  const renderNote = film.rendered ? "草稿 · 响度未测" : "尚未";
+  return [["lint", film.frames ? "通过" : "未跑"], ["readcheck", film.delivered || film.rendered ? "待成片复核" : "未跑"], ["风格帧", frameNote], ["规格", fmtDur(film.dur) + " / 24fps"], ["渲染", renderNote], ["黑帧", film.rendered || film.delivered ? "未检" : "未检"]];
+}
+function qcHTML(film) {
+  return '<div class="qc"><span><b>质检</b></span>' + qcItems(film).map(([k, v]) => '<span><b>' + esc(k) + '</b>' + esc(v) + '</span>').join("") + "</div>";
+}
+
+function filtered() {
+  const q = state.q.trim().toLowerCase();
+  return STYLES.filter(s => {
+    if (state.cat !== "全部" && s.cat !== state.cat) return false;
+    if (!q) return true;
+    return [s.cn, s.en, s.slug, s.line, s.cat, s.film, s.num].join("\n").toLowerCase().includes(q);
+  });
+}
+function grouped(list) {
+  if (state.q.trim()) return [{ cat: null, items: list }];
+  const map = new Map();
+  for (const s of list) {
+    if (!map.has(s.cat)) map.set(s.cat, []);
+    map.get(s.cat).push(s);
+  }
+  return [...map.entries()].map(([cat, items]) => ({ cat, items }));
+}
+
+function plateHTML(s, lead, i) {
+  const delay = Math.min(i, 8) * 36;
+  return '<button type="button" class="plate' + (lead ? " lead" : "") + '" data-act="open-style" data-slug="' + esc(s.slug) + '" style="animation-delay:' + delay + 'ms">'
+    + '<div class="frame"><img src="' + esc(poster(s.slug)) + '" alt="' + esc(s.cn) + '"' + (lead ? "" : ' loading="lazy"') + '>'
+    + '<div class="vignette"></div>'
+    + '<div class="float"><span>' + esc(s.cat) + '</span><span>进入</span></div>'
+    + (lead ? '<div class="burn"><span class="num">' + esc(s.num) + '</span><span class="cn">' + esc(s.cn) + '</span></div>' : "")
+    + '</div><div class="cap"><span class="num">' + esc(s.num) + '</span><span class="cn">' + esc(lead ? s.en : s.cn) + '</span><span class="dur">' + fmtDur(s.dur) + '</span>'
+    + '<span class="en">' + esc(s.cat) + " · " + esc(lead ? s.line : s.en) + '</span>'
+    + (lead ? "" : '<span class="line">' + esc(s.line) + '</span>')
+    + "</div></button>";
+}
+
+function paintWall() {
+  const wall = document.getElementById("wall");
+  const shown = document.getElementById("shown");
+  if (!wall) return;
+  const list = filtered();
+  if (shown) {
+    const name = state.q.trim() ? "检索 · " + state.q.trim() : (state.cat === "全部" ? "" : state.cat);
+    shown.innerHTML = '<b>' + list.length + '</b> 种' + (name ? " · " + esc(name) : "") + (state.q.trim() ? ' <button type="button" data-act="clear-q">清除</button>' : "");
+  }
+  if (!list.length) {
+    wall.innerHTML = '<div class="empty"><p class="cn">暗房里没有这一张。</p><p>试试水彩、ink-wash，或 slug。</p></div>';
+    return;
+  }
+  const groups = grouped(list);
+  let i = 0;
+  let html = "";
+  for (const g of groups) {
+    if (g.cat) {
+      html += '<div class="sec-head"><span class="ix">' + catIx(g.cat) + '</span><h2>' + esc(g.cat) + '</h2><span class="ct">' + g.items.length + '</span></div>';
+    }
+    g.items.forEach((s, idx) => {
+      html += plateHTML(s, idx === 0, i);
+      i += 1;
+    });
+  }
+  wall.innerHTML = html;
+}
+function paintIndex() {
+  document.querySelectorAll("[data-act='cat']").forEach(btn => btn.classList.toggle("on", btn.dataset.cat === state.cat));
+}
+
+function drawGallery() {
+  document.title = "视频工坊 · 画法";
+  const cats = allCats();
+  const rows = state.films.map(f => {
+    const s = styleOf(f);
+    return '<button type="button" class="now-row' + (isLive(f) ? " live" : "") + '" data-act="open-film" data-id="' + esc(f.id) + '">'
+      + '<i class="sq"></i><span class="title">' + esc(book(f.title)) + '</span><span class="sub">' + esc(s.cn) + '</span>'
+      + '<span class="dur">' + fmtDur(f.dur) + '</span><span class="st">' + esc(filmStatus(f)) + '</span><span class="go">打开</span></button>';
+  }).join("");
+  const index = '<button type="button" class="cat' + (state.cat === "全部" ? " on" : "") + '" data-act="cat" data-cat="全部"><span>全部</span><em>' + STYLES.length + '</em></button><div class="rule"></div>'
+    + cats.map(c => '<button type="button" class="cat' + (state.cat === c ? " on" : "") + '" data-act="cat" data-cat="' + esc(c) + '"><span>' + esc(c) + '</span><em>' + catCount(c) + '</em></button>').join("");
+  document.getElementById("app").innerHTML = '<div class="gallery"><header class="mast"><div><p class="kicker"><b>视频工坊</b>LEMO · 暗房</p><h1>画法</h1><p class="dek">选一种画法。海报在灯上，想法交给导演。</p></div><div class="mast-side"><p class="lib">放映单</p><p class="live"><i></i>66 种风格 · Lemo 库已连接</p></div></header>'
+    + '<section class="now"><div class="now-label">进行中</div><div>' + rows + '</div></section>'
+    + '<div class="catalog"><aside class="index"><label class="search"><span>检索</span><input id="q" type="text" value="' + esc(state.q) + '" placeholder="中文 / 英文 / slug" autocomplete="off" spellcheck="false"></label><nav>' + index + '</nav></aside>'
+    + '<div class="catalog-main"><div class="wall-head" id="shown"></div><div class="wall" id="wall"></div></div></div></div>';
+  paintWall();
+}
+
+function saveDraft() {
+  if (!state.style) return;
+  state.drafts[state.style.slug] = {
+    idea: state.idea, lang: state.lang, dur: state.dur, voice: state.voice, story: state.story, advOpen: state.advOpen
+  };
+}
+function choices(name, options, current) {
+  return '<div class="choices">' + options.map(([v, label]) => '<button type="button" data-act="choice" data-name="' + name + '" data-v="' + esc(v) + '" class="' + (String(current) === String(v) ? "on" : "") + '">' + esc(label) + '</button>').join("") + '</div>';
+}
+function drawNew() {
+  const s = state.style;
+  document.title = "新建 · " + s.cn;
+  document.getElementById("app").innerHTML = '<div class="screen-new"><div class="hero"><img src="' + esc(poster(s.slug)) + '" alt="' + esc(s.cn) + '"><button type="button" class="hero-back" data-act="back">放映单</button><div class="hero-copy"><div class="num">' + esc(s.num) + '</div><h2>' + esc(s.cn) + '</h2><p class="en">' + esc(s.en) + '</p><p class="line">' + esc(s.line) + '</p><p class="meta">' + esc(s.cat) + " · 参考 " + fmtDur(s.dur) + " · 样片 " + esc(s.film) + '</p></div></div>'
+    + '<div class="form-col"><p class="form-kicker">' + esc(s.num) + ' · 新建</p><label class="field-lab" for="idea">想法</label><textarea id="idea" class="idea' + (state.ideaError ? " bad" : "") + '" spellcheck="false" placeholder="写一句要拍的。谁，在哪，发生什么。">' + esc(state.idea) + '</textarea>'
+    + (state.ideaError ? '<p class="err" id="idea-err">先写下一句要拍的。没有这句，导演开不了组。</p>' : '<p class="err" id="idea-err" hidden></p>')
+    + '<div class="opt-row"><span class="lab">语言</span>' + choices("lang", [["中文", "中文"], ["English", "English"]], state.lang) + '</div>'
+    + '<div class="opt-row"><span class="lab">时长</span>' + choices("dur", [[30, "30"], [45, "45"], [60, "60"]], state.dur) + '</div>'
+    + '<div class="opt-row"><span class="lab">配音</span>' + choices("voice", [["true", "要"], ["false", "不要"]], state.voice) + '</div>'
+    + '<button type="button" class="adv" data-act="adv">' + (state.advOpen ? "收起高级" : "高级 · 先看分镜") + '</button>'
+    + (state.advOpen ? '<p class="hint">导演先交 6 到 9 张关键帧，拼成一张 contact sheet。你点头，才往下做。不要的话，风格帧过了直接走。</p><div class="opt-row"><span class="lab">先看分镜</span>' + choices("story", [["true", "要"], ["false", "不要"]], state.story) + '</div>' : "")
+    + '<div class="actions"><button type="button" class="btn" data-act="create">建组，交给导演</button><button type="button" class="btn-text" data-act="back">换一个风格</button></div></div></div>';
+}
+
+function stopPlay() {
+  if (state.playTimer) clearInterval(state.playTimer);
+  state.playTimer = null;
+  if (state.film) state.film.playing = false;
+}
+function paintStatus() {
+  const n = document.getElementById("status-line");
+  if (n) n.textContent = state.status || "";
+  const bar = document.querySelector(".rbar");
+  if (bar) bar.classList.toggle("on", state.rendering);
+  const btn = document.getElementById("render-btn");
+  if (btn) btn.textContent = state.rendering ? "渲染中" : "新渲染";
+  if (btn) btn.disabled = state.rendering || state.pulling;
+}
+function syncRail() {
+  const film = state.film;
+  if (!film) return;
+  document.querySelectorAll(".stage-btn").forEach(btn => {
+    btn.classList.toggle("on", btn.dataset.stage === film.stage);
+    btn.classList.toggle("done", film.done.includes(btn.dataset.stage));
+  });
+  const foot = document.getElementById("rail-foot");
+  if (foot) foot.innerHTML = "<span>阶段</span><strong>" + stageNo(film.stage) + " / 06</strong>";
+  const meta = document.getElementById("meta");
+  if (meta) meta.textContent = styleOf(film).cn + " · " + fmtDur(film.dur) + " · " + stageName(film.stage);
+  const ctx = document.getElementById("ctx");
+  if (ctx) ctx.innerHTML = '<div class="ft" id="ctx-title">' + esc(book(film.title)) + '</div><div class="sub">' + esc(styleOf(film).cn) + " · " + esc(stageName(film.stage)) + " · " + fmtDur(film.dur) + " · " + esc(film.lang) + " · " + (film.voice ? "有配音" : "无配音") + "</div>";
+}
+function paintDock() {
+  const notes = document.getElementById("notes");
+  if (!notes || !state.film) return;
+  notes.innerHTML = state.film.messages.map(m => '<div class="note' + (m.dir ? " dir" : "") + '"><div class="who">' + esc(m.who) + '</div><p>' + esc(m.text) + '</p></div>').join("");
+  notes.scrollTop = notes.scrollHeight;
+}
+function say(who, text) {
+  state.film.messages.push({ who: who, dir: who === "导演", text: text });
+  paintDock();
+}
+
+function gateHTML(film, img, extra) {
+  const f = film.frames && film.frames[film.frame];
+  const gray = f && f.gray;
+  const src = img || (f ? poster(film.slug) : "");
+  const crop = f ? f.crop : "50% 50%";
+  return '<div class="matte"><div class="gate" data-act="open-frame"><div class="pullbar"></div>'
+    + (src ? '<img src="' + esc(src) + '" alt="" style="object-position:' + esc(crop) + '" class="' + (gray ? "gray" : "") + '">' : "")
+    + (extra || "")
+    + (f && !extra ? '<span class="tc">' + fmtTC(f.t) + '</span>' : "")
+    + (gray ? '<span class="slate-flag">待改</span>' : "")
+    + '</div></div>';
+}
+function stripHTML(film) {
+  if (!film.frames) return "";
+  const cells = film.frames.map((f, i) => '<button type="button" class="still' + (i === film.frame ? " on" : "") + '" data-act="select-frame" data-i="' + i + '"><img src="' + esc(poster(film.slug)) + '" alt="" style="object-position:' + esc(f.crop) + '" class="' + (f.gray ? "gray" : "") + '">' + (f.status === "revise" ? '<span class="flag">待改</span>' : "") + '</button>').join("");
+  return '<div class="strip-wrap"><div class="perfs"></div><div class="strip">' + cells + '</div><div class="perfs"></div></div>';
+}
+function framesStage(film) {
+  if (!film.frames) {
+    return '<div class="stage-in"><div class="screen-col"><div class="matte"><div class="gate"><div class="slate"><strong>还没抽帧。</strong><span>window.render(t) · 未跑</span></div></div></div></div><div class="row-actions"><button type="button" class="btn" data-act="extract">按 STYLE.md 抽 3 张</button></div>' + qcHTML(film) + '</div>';
+  }
+  const f = film.frames[film.frame];
+  const renderState = state.pulling ? "抽帧中" : "已返回";
+  return '<div class="stage-in"><div class="screen-col">' + gateHTML(film) + '</div><div class="lower">' + stripHTML(film) + '<div class="frame-note"><div class="readout"><span>' + fmtTC(f.t) + '</span><span>window.render(' + f.t.toFixed(2) + ') · ' + renderState + '</span><span>lint 通过</span>' + (film.rerolled ? '<span>已重抽</span>' : "") + '</div><p class="judgment">' + esc(f.note) + '</p><div class="row-actions"><button type="button" class="btn" data-act="reroll"' + (state.pulling ? " disabled" : "") + '>' + (state.pulling ? "正在抽帧" : "重抽帧") + '</button><button type="button" class="btn-text" data-act="fix-frame">让导演改这一帧</button></div></div></div>' + qcHTML(film) + '</div>';
+}
+function deliveryStage(film) {
+  const ready = film.rendered || film.delivered;
+  let gate;
+  if (!ready) {
+    const why = dirty(film) ? "第 2 帧仍待改。改完再渲染。" : "风格帧点头之后再出片。";
+    gate = '<div class="matte"><div class="gate"><div class="slate"><strong>这一版还没有成片。</strong><span>' + esc(why) + '</span></div></div></div>';
+  } else {
+    const cur = film.versions[film.version];
+    gate = '<div class="matte"><div class="gate" id="player" data-act="play"><img src="' + esc(poster(film.slug)) + '" alt="" style="object-position:50% 40%"><span class="tc" id="play-tc">' + fmtTC(film.playhead) + '</span><button type="button" class="play" data-act="play" aria-label="' + (film.playing ? "暂停" : "播放") + '">' + (film.playing ? '<span class="pause"><i></i><i></i></span>' : '<span class="tri"></span>') + '</button></div></div>'
+      + '<div class="transport"><span class="tc-read" id="play-read">' + fmtTC(film.playhead) + " / " + fmtTC(film.dur) + '</span><div class="scrub" data-act="seek"><b><i id="play-bar" style="width:' + (film.playhead / film.dur * 100) + '%"></i></b></div></div>';
+    if (cur) gate += "";
+  }
+  const vers = (film.versions || []).map((v, i) => '<tr class="' + (i === film.version ? "on" : "") + '"><td><button type="button" data-act="version" data-i="' + i + '"><i class="sq"></i>' + esc(v.name) + '</button></td><td class="m">' + esc(v.ver) + '</td><td class="m">' + fmtDur(film.dur) + '</td><td class="m">' + esc(v.lufs) + ' LUFS</td><td class="m">' + esc(v.render) + '</td></tr>').join("");
+  return '<div class="stage-in"><div class="screen-col">' + gate + '</div>' + (vers ? '<table class="vers">' + vers + '</table>' : "") + '<div class="row-actions"><button type="button" class="btn-ghost" data-act="open-file">打开成片</button></div>' + qcHTML(film) + '</div>';
+}
+function briefStage(film) {
+  return '<div class="page stage-in"><h3>简报</h3><p class="dek">建组时写进 BRIEF.md 的就是这些。导演不再追问。</p><table class="kv"><tr><th>想法</th><td>' + esc(film.idea) + '</td></tr><tr><th>语言</th><td>' + esc(film.lang) + '</td></tr><tr><th>时长</th><td>' + fmtDur(film.dur) + '</td></tr><tr><th>配音</th><td>' + (film.voice ? "要" : "不要") + '</td></tr><tr><th>分镜</th><td>' + (film.story ? "先看" : "先不看") + '</td></tr><tr><th>画法</th><td>' + esc(styleOf(film).cn) + '</td></tr></table></div>';
+}
+function treatmentStage(film) {
+  if (film.boot) {
+    return '<div class="page stage-in"><h3>Treatment</h3><p class="dek">导演正在写三个结构方案。选一个，再落镜头表。</p><p class="cue">TREATMENT.md · 未落盘</p></div>';
+  }
+  const t = film.treatment;
+  const opts = t.options.map(([k, text]) => '<button type="button" class="opt' + (t.chosen === k ? " on" : "") + '" data-act="pick" data-v="' + k + '"><span class="k">' + k + '</span><span>' + esc(text) + '</span></button>').join("");
+  const shots = t.shots.map(([tm, fr, why]) => '<tr><td class="t">' + esc(tm) + '</td><td class="f">' + esc(fr) + '</td><td>' + esc(why) + '</td></tr>').join("");
+  return '<div class="page stage-in"><h3>Treatment</h3><p class="dek">' + esc(t.logline) + '</p>' + opts + '<p class="why">选定 ' + esc(t.chosen) + '。' + esc(t.why) + '</p><table class="shots">' + shots + '</table><p class="cue">' + esc(t.cue).replaceAll("\n", "<br>") + '</p></div>';
+}
+function storyStage(film) {
+  if (!film.sheet) {
+    const ask = film.story ? "你要先看分镜。6 到 9 张关键帧拼成一张，点头才继续。" : "这一版没有要先看分镜。风格帧过了可以直接走。";
+    return '<div class="page stage-in"><h3>分镜</h3><p class="dek">' + ask + '</p><div class="row-actions"><button type="button" class="btn" data-act="make-sheet">做一张 contact sheet</button></div>' + qcHTML(film) + '</div>';
+  }
+  const caps = ["00:00 特写", "00:02 拉开", "00:08 中景", "00:16 特写", "00:28 远景", "00:40 落幅"];
+  const cells = caps.map((c, i) => '<figure><img src="' + esc(poster(film.slug)) + '" alt="" style="object-position:' + CROPS[i] + '"><figcaption>' + esc(c) + '</figcaption></figure>').join("");
+  return '<div class="page stage-in"><h3>分镜</h3><p class="dek">6 张关键帧。点头之后才接时间轴，不在这里改画法。</p><div class="sheet">' + cells + '</div>' + qcHTML(film) + '</div>';
+}
+function soundStage(film) {
+  if (!film.done.includes("sound") && !film.delivered) {
+    return '<div class="page stage-in"><h3>声音</h3><p class="dek">还没到这一步。' + (film.voice ? "配音要，等风格帧点头再录。" : "这支不要配音。动作自己出声，仍要留两处静默。") + '</p><table class="kv"><tr><th>配音</th><td>' + (film.voice ? "要 · 未录" : "不要") + '</td></tr><tr><th>配乐</th><td>未混</td></tr><tr><th>响度</th><td>未测</td></tr></table></div>';
+  }
+  const bed = film.slug === "crayon-book" ? "蜡笔刮纸，灯灭是第一声" : (film.slug === "watercolor" ? "潮水垫底，先于旁白" : "环境底噪，先于人声");
+  return '<div class="page stage-in"><h3>声音</h3><p class="dek">人声、环境、配乐三层。音乐让人声，不反过来。</p><table class="kv"><tr><th>配音</th><td>已回读 · 6 条 · ' + esc(film.lang) + '</td></tr><tr><th>环境</th><td>' + bed + '</td></tr><tr><th>配乐</th><td>已混 · 不铺通用钢琴</td></tr><tr><th>静默</th><td>两处：动作之前，开口之前</td></tr><tr><th>响度</th><td>' + esc(film.lufs || "−14.1") + ' LUFS</td></tr></table></div>';
+}
+function paintStage() {
+  const host = document.getElementById("stage-body");
+  if (!host || !state.film) return;
+  if (state.film.stage !== "delivery") stopPlay();
+  const film = state.film;
+  const map = { brief: briefStage, treatment: treatmentStage, frames: framesStage, story: storyStage, sound: soundStage, delivery: deliveryStage };
+  host.innerHTML = (map[film.stage] || briefStage)(film);
+  if (state.pulling) requestAnimationFrame(() => { const g = host.querySelector(".gate"); if (g) g.classList.add("pulling"); });
+  if (film.stage === "delivery" && film.playing) startPlay(true);
+}
+
+function drawDesk() {
+  const film = state.film;
+  document.title = film.title + " · 视频工坊";
+  document.body.classList.add("desk-on");
+  const stages = STAGES.map(s => '<button type="button" class="stage-btn' + (film.stage === s.id ? " on" : "") + (film.done.includes(s.id) ? " done" : "") + '" data-act="stage" data-stage="' + s.id + '"><i class="hole"></i><span class="n">' + s.n + '</span><span class="name">' + s.name + '</span></button>').join("");
+  const acts = ACTS.map(a => '<button type="button" data-act="quick" data-q="' + esc(a) + '">' + esc(a) + '</button>').join("");
+  document.getElementById("app").innerHTML = '<div class="desk"><header class="top"><button type="button" class="back" data-act="back">放映单</button><div class="title-line"><span class="bq">《</span><input id="title" value="' + esc(film.title) + '" spellcheck="false" aria-label="片名"><span class="bq">》</span></div><div class="meta" id="meta"></div><div class="status-line" id="status-line">' + esc(state.status) + '</div><button type="button" class="btn-ghost" data-act="finder">在 Finder 中显示</button><button type="button" class="btn" id="render-btn" data-act="render">新渲染</button><div class="rbar' + (state.rendering ? " on" : "") + '"><i></i></div></header>'
+    + '<div class="body' + (state.dockOpen ? "" : " shut") + '" id="body"><aside class="rail"><div class="rail-stages">' + stages + '</div><div class="rail-foot" id="rail-foot"></div></aside>'
+    + '<main class="stage" id="stage-body"></main>'
+    + '<aside class="dock' + (state.dockOpen ? "" : " shut") + '" id="dock"><button type="button" class="vert" data-act="dock">导演</button><div class="dock-main"><div class="dock-head"><h2>导演</h2><button type="button" data-act="dock">收起</button></div><div class="ctx" id="ctx"></div><div class="notes" id="notes"></div><div class="acts">' + acts + '</div><div class="composer"><input id="say" placeholder="跟导演说一句" autocomplete="off" spellcheck="false"><button type="button" data-act="send">发送</button></div></div></aside></div></div>';
+  syncRail();
+  paintDock();
+  paintStage();
+  paintStatus();
+  sizeTitle(document.getElementById("title"));
+}
+
+function draw() {
+  stopPlay();
+  closeLight();
+  document.body.classList.toggle("desk-on", state.screen === "desk");
+  if (state.screen === "gallery") drawGallery();
+  else if (state.screen === "new") drawNew();
+  else drawDesk();
+  window.scrollTo(0, 0);
+}
+
+function openStyle(slug) {
+  const s = STYLES.find(x => x.slug === slug);
+  if (!s) return;
+  state.style = s;
+  const d = state.drafts[slug];
+  if (d) Object.assign(state, d);
+  else {
+    state.idea = ideaFor(s);
+    state.lang = "中文";
+    state.dur = 45;
+    state.voice = true;
+    state.story = false;
+    state.advOpen = false;
+  }
+  state.ideaError = false;
+  state.screen = "new";
+  draw();
+  const idea = document.getElementById("idea");
+  if (idea) {
+    idea.focus();
+    const n = idea.value.length;
+    idea.setSelectionRange(n, n);
+  }
+}
+function openFilm(id) {
+  const film = state.films.find(f => f.id === id);
+  if (!film) return;
+  state.film = film;
+  state.status = "";
+  state.screen = "desk";
+  state.dockOpen = true;
+  draw();
+}
+function createFilm() {
+  const idea = state.idea.trim();
+  saveDraft();
+  if (!idea) {
+    state.ideaError = true;
+    drawNew();
+    const ideaEl = document.getElementById("idea");
+    if (ideaEl) ideaEl.focus();
+    return;
+  }
+  const style = state.style;
+  let title = style.slug === "watercolor" && /退潮|湿沙|潮水/.test(idea) ? "潮水退去之前" : idea.replace(/[，。！？、\s].*$/, "").slice(0, 12);
+  if (!title) title = style.cn;
+  if (state.films.some(f => f.title === title)) title = title + " · 新组";
+  const film = {
+    id: "f" + Date.now(),
+    title: title,
+    slug: style.slug,
+    dur: Number(state.dur),
+    lang: state.lang,
+    voice: state.voice === true || state.voice === "true",
+    story: state.story === true || state.story === "true",
+    idea: idea,
+    stage: "treatment",
+    done: ["brief"],
+    frame: 0,
+    rerolled: false,
+    rendered: false,
+    delivered: false,
+    playhead: 0,
+    playing: false,
+    version: 0,
+    versions: [],
+    lufs: "",
+    sheet: false,
+    boot: true,
+    frames: null,
+    treatment: makeTreatment(style, idea),
+    messages: [{ who: "导演", dir: true, text: "组已建好。BRIEF.md 和 project.json 写进文件夹了。我先写 Treatment：三个结构，选一个，再落镜头表。画法按" + style.cn + "，不动。" }]
+  };
+  state.films.unshift(film);
+  state.film = film;
+  state.status = "项目已建 · " + projectPath(film);
+  state.screen = "desk";
+  state.dockOpen = true;
+  draw();
+  const id = film.id;
+  setTimeout(() => {
+    if (!state.film || state.film.id !== id) return;
+    state.film.boot = false;
+    if (!state.film.done.includes("treatment")) state.film.done.push("treatment");
+    paintStage();
+    syncRail();
+  }, 720);
+}
+
+function gotoStage(id) {
+  state.film.stage = id;
+  syncRail();
+  paintStage();
+}
+function extract() {
+  const film = state.film;
+  film.frames = makeFrames(film, true);
+  film.frame = 1;
+  film.stage = "frames";
+  if (!film.done.includes("frames")) film.done.push("frames");
+  syncRail();
+  paintStage();
+  say("导演", "三张抽完。第 2 张中间灰了一层，纸色不干净。你看要不要改。时间轴不动。");
+}
+function finishReroll() {
+  const film = state.film;
+  state.pulling = false;
+  if (!film.frames) return;
+  const f = film.frames[1] || film.frames[film.frame];
+  f.gray = false;
+  f.status = "ok";
+  f.note = film.id === "tide" ? "远山罩染降了一档，浪尖留白提回来了。海面有层次。" : "罩染收住了，纸色回来了。";
+  film.rerolled = true;
+  film.frame = 1;
+  state.status = "已重抽 · 3 张 · 时间轴未动";
+  paintStatus();
+  paintStage();
+  syncRail();
+  say("导演", "三张重抽完。第 2 帧远山罩染降了一档，浪尖留白回来了。你看海面。时间轴没动。");
+}
+function reroll() {
+  const film = state.film;
+  if (state.pulling || state.rendering) return;
+  if (!film.frames) { extract(); return; }
+  if (film.delivered && film.versions[film.version] && film.versions[film.version].name === "交付") {
+    say("导演", "v4 已经交了。重抽是新的一轮，不会改已交付的文件。要抽就先另开草稿。");
+    return;
+  }
+  if (film.rerolled && !dirty(film)) {
+    say("导演", "刚抽过。和第 2 帧改过的一样，没有新问题。要动的话改 film.js，不是再抽一遍。");
+    state.status = "已重抽 · 没有新问题";
+    paintStatus();
+    return;
+  }
+  state.pulling = true;
+  pullToken += 1;
+  const token = pullToken;
+  state.status = "still.mjs · 抽 1/3";
+  paintStatus();
+  paintStage();
+  const steps = ["抽 2/3", "抽 3/3"];
+  steps.forEach((label, i) => {
+    setTimeout(() => {
+      if (token !== pullToken) return;
+      state.status = "still.mjs · " + label;
+      paintStatus();
+    }, 380 * (i + 1));
+  });
+  setTimeout(() => { if (token === pullToken) finishReroll(); }, 1200);
+}
+function fixFrame() {
+  const film = state.film;
+  if (!film.frames) { say("导演", "还没抽帧。先按 STYLE.md 抽三张，再谈改哪一张。"); return; }
+  const f = film.frames[film.frame];
+  if (f.status === "revise") {
+    const already = film.messages.some(m => m.text.includes("罩染"));
+    if (!already) film.messages.push({ who: "你", dir: false, text: "第二张太灰了，海面看不出层次。" });
+    say("导演", already ? "这句我记下了。按重抽帧，我现在抽。时间轴不动。" : "第 2 帧的问题在纸白被水彩罩染吃掉了。我把远山的罩染降一档、浪尖留白提回来，再抽 3 张。时间轴不动。");
+    return;
+  }
+  say("导演", "这一张可以留。要改的话告诉我哪里不行，我不连着另两张一起动。");
+}
+function nextVer(film) {
+  const nums = film.versions.map(v => parseInt(String(v.ver).replace(/\D/g, ""), 10) || 0);
+  return "v" + ((nums.length ? Math.max(...nums) : 0) + 1);
+}
+function startRender() {
+  const film = state.film;
+  if (state.rendering || state.pulling) return;
+  if (dirty(film)) {
+    state.status = "未出片 · 第 2 帧仍待改";
+    paintStatus();
+    say("导演", "第 2 帧还是灰的。现在渲染，成片会把这个问题做实。先重抽。");
+    return;
+  }
+  state.rendering = true;
+  renderToken += 1;
+  const token = renderToken;
+  state.status = "video.mjs · 渲染中";
+  paintStatus();
+  setTimeout(() => {
+    if (token !== renderToken || !state.film) return;
+    state.rendering = false;
+    film.rendered = true;
+    const ver = nextVer(film);
+    film.versions.push({ name: "草稿", ver: ver, lufs: "未测", render: "刚刚" });
+    film.version = film.versions.length - 1;
+    if (!film.done.includes("delivery")) film.done.push("delivery");
+    film.stage = "delivery";
+    film.playhead = 0;
+    state.status = "草稿已写入 · " + ver + " · 响度未测";
+    paintStatus();
+    syncRail();
+    paintStage();
+    say("导演", "草稿渲染完。响度还没测，先别当成交片。黑帧也还没检。");
+  }, 1300);
+}
+function makeSheet() {
+  const film = state.film;
+  film.sheet = true;
+  film.stage = "story";
+  if (!film.done.includes("story")) film.done.push("story");
+  syncRail();
+  paintStage();
+  say("导演", "6 格在。你点头我再接时间轴。画法不动。");
+}
+function quick(q) {
+  const film = state.film;
+  if (q === "写 Treatment") {
+    gotoStage("treatment");
+    say("导演", film.treatment ? "Treatment 在。选定的是 " + film.treatment.chosen + "。要换结构就点那一行，风格不动。" : "我来写三个结构。");
+  } else if (q === "按 STYLE.md 做 3 张风格帧") {
+    if (film.frames) {
+      gotoStage("frames");
+      say("导演", dirty(film) ? "三张在。第 2 张还是灰的。" : "三张在。第 2 张已经改过。");
+    } else extract();
+  } else if (q === "这一帧太灰，改") {
+    if (film.stage !== "frames") gotoStage("frames");
+    if (film.frames) {
+      const bad = film.frames.findIndex(f => f.status === "revise");
+      if (bad >= 0) film.frame = bad;
+      paintStage();
+    }
+    fixFrame();
+  } else if (q === "按分镜表接时间轴") {
+    if (!film.sheet) {
+      gotoStage("story");
+      say("导演", film.story ? "你要先看分镜。我先补 6 格，你点头再接。" : "你没有要先看分镜。要接时间轴，我可以现在补一张 6 格。");
+    } else {
+      gotoStage("story");
+      say("导演", "分镜在。时间轴按这 6 格接，不再改结构。");
+    }
+  } else if (q === "检查字幕停留") {
+    if (!film.rendered && !film.delivered) say("导演", "字幕还没写。readcheck 要等成片。现在能看的是风格帧，不是字幕停留。");
+    else say("导演", "6 条字幕都过了 1.8 秒。没有压住主体。中文按每秒四个半字再加 1.5 秒留，短于这个的我会拉开。");
+  } else if (q === "渲染草稿") startRender();
+}
+function sendSay() {
+  const input = document.getElementById("say");
+  if (!input) return;
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = "";
+  state.film.messages.push({ who: "你", dir: false, text: text });
+  let reply;
+  if (/灰|层次|海面|罩染/.test(text)) reply = "第 2 帧的问题在纸白被水彩罩染吃掉了。我把远山的罩染降一档、浪尖留白提回来，再抽 3 张。时间轴不动。";
+  else if (/开头|三秒|抓人/.test(text)) reply = "现在是从全景推入。改成先给一个退潮后的湿沙特写，第二秒才拉开。改的是 film.js 的镜头表，不动风格。";
+  else if (/字幕|停留/.test(text)) reply = "字幕停留按中文来：每条不少于 1.8 秒。成片之前 readcheck 不跑，我不会拿静帧假装过了。";
+  else if (/交|可以了|交付/.test(text)) reply = dirty(state.film) ? "还不能交。第 2 帧是灰的，这一版交出去会把问题做实。" : "可以往下走。响度没到 −14 左右、字幕没读完之前，我不写交付。";
+  else reply = "听到了。这一步还在" + stageName(state.film.stage) + "，我只改你点到的地方，风格不动。";
+  say("导演", reply);
+}
+function openLight() {
+  const film = state.film;
+  if (!film || !film.frames) return;
+  const f = film.frames[film.frame];
+  closeLight();
+  const node = document.createElement("div");
+  node.className = "light";
+  node.id = "light";
+  node.innerHTML = '<img src="' + esc(poster(film.slug)) + '" alt="' + esc(fmtTC(f.t)) + '" style="object-position:' + esc(f.crop) + '" class="' + (f.gray ? "gray" : "") + '"><div class="row"><p>' + esc(f.note) + '</p><span class="tc2">' + fmtTC(f.t) + ' · window.render(' + f.t.toFixed(2) + ')</span></div><button type="button" class="btn-text" data-act="close-light">关闭</button>';
+  document.body.appendChild(node);
+}
+function closeLight() {
+  const n = document.getElementById("light");
+  if (n) n.remove();
+}
+function startPlay(keep) {
+  const film = state.film;
+  if (!keep) film.playing = !film.playing;
+  if (!film.playing) { stopPlay(); paintStage(); return; }
+  if (state.playTimer) clearInterval(state.playTimer);
+  state.playTimer = setInterval(() => {
+    if (!state.film || state.film.stage !== "delivery") { stopPlay(); return; }
+    state.film.playhead += 0.2;
+    if (state.film.playhead >= state.film.dur) state.film.playhead = 0;
+    const tc = document.getElementById("play-tc");
+    const read = document.getElementById("play-read");
+    const bar = document.getElementById("play-bar");
+    if (tc) tc.textContent = fmtTC(state.film.playhead);
+    if (read) read.textContent = fmtTC(state.film.playhead) + " / " + fmtTC(state.film.dur);
+    if (bar) bar.style.width = (state.film.playhead / state.film.dur * 100) + "%";
+  }, 80);
+  if (!keep) paintStage();
+}
+function seek(e) {
+  const film = state.film;
+  const bar = e.target.closest(".scrub");
+  if (!bar || !film) return;
+  const r = bar.getBoundingClientRect();
+  film.playhead = Math.min(film.dur, Math.max(0, (e.clientX - r.left) / r.width * film.dur));
+  const tc = document.getElementById("play-tc");
+  const read = document.getElementById("play-read");
+  const fill = document.getElementById("play-bar");
+  if (tc) tc.textContent = fmtTC(film.playhead);
+  if (read) read.textContent = fmtTC(film.playhead) + " / " + fmtTC(film.dur);
+  if (fill) fill.style.width = (film.playhead / film.dur * 100) + "%";
+}
+
+function onClick(e) {
+  if (e.target.id === "light") { closeLight(); return; }
+  const t = e.target.closest("[data-act]");
+  if (!t) return;
+  const act = t.dataset.act;
+  if (act === "cat") {
+    state.cat = t.dataset.cat;
+    paintIndex();
+    paintWall();
+    return;
+  }
+  if (act === "clear-q") {
+    state.q = "";
+    const q = document.getElementById("q");
+    if (q) q.value = "";
+    paintWall();
+    if (q) q.focus();
+    return;
+  }
+  if (act === "open-style") { openStyle(t.dataset.slug); return; }
+  if (act === "open-film") { openFilm(t.dataset.id); return; }
+  if (act === "back") {
+    saveDraft();
+    state.screen = "gallery";
+    state.status = "";
+    draw();
+    return;
+  }
+  if (act === "create") { createFilm(); return; }
+  if (act === "choice") {
+    const name = t.dataset.name;
+    let v = t.dataset.v;
+    if (v === "true") v = true;
+    else if (v === "false") v = false;
+    else if (name === "dur") v = Number(v);
+    state[name] = v;
+    saveDraft();
+    drawNew();
+    return;
+  }
+  if (act === "adv") { state.advOpen = !state.advOpen; saveDraft(); drawNew(); return; }
+  if (act === "stage") { gotoStage(t.dataset.stage); return; }
+  if (act === "dock") {
+    state.dockOpen = !state.dockOpen;
+    document.getElementById("body").classList.toggle("shut", !state.dockOpen);
+    document.getElementById("dock").classList.toggle("shut", !state.dockOpen);
+    return;
+  }
+  if (act === "finder") {
+    state.status = "Finder · " + projectPath(state.film);
+    paintStatus();
+    return;
+  }
+  if (act === "render") { startRender(); return; }
+  if (act === "reroll") { reroll(); return; }
+  if (act === "extract") { extract(); return; }
+  if (act === "fix-frame") { fixFrame(); return; }
+  if (act === "select-frame") {
+    state.film.frame = Number(t.dataset.i);
+    paintStage();
+    return;
+  }
+  if (act === "open-frame") { openLight(); return; }
+  if (act === "close-light") { closeLight(); return; }
+  if (act === "play") { startPlay(false); return; }
+  if (act === "seek") { seek(e); return; }
+  if (act === "version") {
+    state.film.version = Number(t.dataset.i);
+    state.film.playhead = 0;
+    stopPlay();
+    paintStage();
+    return;
+  }
+  if (act === "open-file") {
+    const film = state.film;
+    const cur = film.versions[film.version];
+    if (!cur) {
+      state.status = "还没有成片文件";
+      say("导演", "文件夹里还没有成片。先渲染草稿。");
+    } else {
+      state.status = "Finder · " + projectPath(film) + "/deliver/" + cur.ver + ".mp4";
+    }
+    paintStatus();
+    return;
+  }
+  if (act === "pick") {
+    state.film.treatment.chosen = t.dataset.v;
+    state.film.treatment.why = t.dataset.v === "B" ? "开头三秒有东西可看。不从全景慢慢推。" : "改选 " + t.dataset.v + "。镜头表按这个重排，风格不动。";
+    paintStage();
+    say("导演", t.dataset.v === "B" ? "就 B。开头三秒有东西可看，不全景慢慢推。" : "改选 " + t.dataset.v + "。镜头表我按这个重排，风格不动。");
+    return;
+  }
+  if (act === "make-sheet") { makeSheet(); return; }
+  if (act === "quick") { quick(t.dataset.q); return; }
+  if (act === "send") { sendSay(); return; }
+}
+function onInput(e) {
+  if (e.target.id === "q") {
+    state.q = e.target.value;
+    paintWall();
+  } else if (e.target.id === "idea") {
+    state.idea = e.target.value;
+    state.ideaError = false;
+    e.target.classList.remove("bad");
+    const err = document.getElementById("idea-err");
+    if (err) err.hidden = true;
+    saveDraft();
+  } else if (e.target.id === "title") {
+    const v = e.target.value.replace(/[《》]/g, "").trim();
+    if (v) state.film.title = v;
+    const ctx = document.getElementById("ctx-title");
+    if (ctx && v) ctx.textContent = book(v);
+    sizeTitle(e.target);
+  }
+}
+function onKey(e) {
+  if (e.key === "Escape") { closeLight(); return; }
+  if (e.key === "Enter" && e.target.id === "say") { e.preventDefault(); sendSay(); }
+  if (e.key === "Enter" && (e.metaKey || e.ctrlKey) && e.target.id === "idea") { e.preventDefault(); createFilm(); }
+}
+
+document.addEventListener("click", onClick);
+document.addEventListener("input", onInput);
+document.addEventListener("keydown", onKey);
+
+// shortcut: 风格帧和成片预览用海报裁切代替 still.mjs / video.mjs 的真输出，接渲染管线时换掉。
+function boot() {
+  if (!Array.isArray(STYLES) || STYLES.length !== 66) {
+    document.getElementById("app").innerHTML = '<p style="padding:24px;color:#f2ece1">风格数据没有装上。</p>';
+    return;
+  }
+  seed();
+  const hash = location.hash.slice(1);
+  if (hash.startsWith("desk/")) openFilm(hash.slice(5));
+  else if (hash.startsWith("new/")) openStyle(hash.slice(4));
+  else draw();
+}
+boot();
+</script>
+</body>
+</html>

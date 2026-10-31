@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>视频工坊 v2 · 三版方向</title>
+<style>
+  :root{
+    --paper:#f3ece0; --paper-2:#e9dfcf; --ink:#141311; --mut:#6f6a60; --dim:#a59c8d;
+    --red:#c8402c; --line:rgba(20,19,17,.18); --line-2:rgba(20,19,17,.34);
+    --serif:"Songti SC","STSong","Noto Serif SC",serif;
+    --sans:"PingFang SC","Hiragino Sans GB","Helvetica Neue",Arial,sans-serif;
+    --mono:"SF Mono",Menlo,"Roboto Mono",monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--paper);color:var(--ink)}
+  body{font:13px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  img{display:block;max-width:100%}
+  ::selection{background:var(--red);color:var(--paper)}
+  .page{max-width:1320px;margin:0 auto;padding:0 40px 100px}
+  .top{display:flex;justify-content:space-between;align-items:center;height:64px;border-bottom:1px solid var(--line-2);font:10px/1 var(--mono);letter-spacing:.1em;color:var(--mut)}
+  .top b{font-weight:500;color:var(--ink)}
+  .top nav{display:flex;gap:22px}
+  .top nav a:hover{color:var(--red)}
+  .mast{padding:72px 0 54px;border-bottom:1px solid var(--line-2);display:grid;grid-template-columns:1fr 330px;gap:60px;align-items:end}
+  .eyebrow{font:9.5px/1 var(--mono);letter-spacing:.18em;color:var(--mut);text-transform:uppercase;display:flex;gap:10px;align-items:center}
+  .eyebrow span{color:var(--red)}
+  h1{font:400 clamp(54px,6.4vw,96px)/.98 var(--serif);letter-spacing:-.03em;margin:20px 0 24px}
+  h1 em{font-style:normal;color:var(--red)}
+  .dek{max-width:620px;color:var(--mut);font-size:14px;line-height:1.95;margin:0}
+  .mast-side{border-top:1px solid var(--line-2);padding-top:14px}
+  .mast-side p{margin:0 0 12px;font-size:11.5px;line-height:1.8;color:var(--mut)}
+  .mast-side b{color:var(--ink);font-weight:500}
+  .num{font:10px/1 var(--mono);color:var(--dim);letter-spacing:.1em}
+
+  .draft{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(300px,.65fr);gap:52px;padding:72px 0;border-bottom:1px solid var(--line-2);align-items:start}
+  .draft:nth-child(even){grid-template-columns:minmax(300px,.65fr) minmax(0,1.35fr)}
+  .draft:nth-child(even) .shots{order:2}
+  .draft:nth-child(even) .copy{order:1}
+  .shots{min-width:0}
+  .shot-main{border:1px solid var(--line-2);background:#0c0b0a;box-shadow:0 24px 60px -40px rgba(20,19,17,.55)}
+  .shot-main img{width:100%;aspect-ratio:16/10;object-fit:cover;object-position:top}
+  .shot-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+  .shot-row img{width:100%;aspect-ratio:16/10;object-fit:cover;object-position:top;border:1px solid var(--line)}
+  .shot-cap{display:flex;justify-content:space-between;margin-top:9px;font:9px/1 var(--mono);color:var(--dim);letter-spacing:.08em}
+  .copy{padding-top:6px}
+  .copy .label{display:flex;align-items:baseline;gap:12px;border-bottom:1px solid var(--line);padding-bottom:12px}
+  .copy .label b{font:400 12px/1 var(--mono);color:var(--red);letter-spacing:.1em}
+  .copy .label span{font:9.5px/1 var(--mono);color:var(--dim);letter-spacing:.12em}
+  .copy h2{font:400 clamp(34px,3.2vw,46px)/1.1 var(--serif);letter-spacing:-.02em;margin:18px 0 6px}
+  .copy h2 em{font-style:normal;color:var(--red)}
+  .copy .tag{font:10px/1.5 var(--mono);color:var(--dim);letter-spacing:.04em;margin:0 0 20px}
+  .copy p{color:var(--mut);font-size:12.5px;line-height:1.95;margin:0 0 16px}
+  .copy ul{list-style:none;margin:6px 0 22px;padding:0}
+  .copy li{position:relative;padding:8px 0 8px 18px;border-top:1px solid var(--line);color:var(--mut);font-size:12px;line-height:1.7}
+  .copy li::before{content:"";position:absolute;left:0;top:16px;width:6px;height:1px;background:var(--red)}
+  .copy li b{color:var(--ink);font-weight:500}
+  .go{display:inline-flex;align-items:center;gap:10px;border-bottom:1px solid var(--ink);padding-bottom:5px;font-size:12px}
+  .go:hover{color:var(--red);border-color:var(--red)}
+  .meta-row{display:flex;gap:22px;margin-top:26px;font:9px/1.5 var(--mono);color:var(--dim);letter-spacing:.06em}
+  .pending{border:1px dashed var(--line-2);padding:40px 24px;color:var(--mut);font-size:12.5px;line-height:1.9;background:rgba(255,255,255,.25)}
+  .pending b{display:block;font:400 22px/1.3 var(--serif);color:var(--ink);margin-bottom:8px}
+
+  .choose{padding:60px 0 0;display:grid;grid-template-columns:1fr 1fr;gap:60px}
+  .choose h3{font:400 30px/1.3 var(--serif);letter-spacing:-.01em;margin:0 0 14px}
+  .choose p{color:var(--mut);font-size:12.5px;line-height:1.95;margin:0 0 12px;max-width:560px}
+  .choose ol{padding-left:18px;color:var(--mut);font-size:12.5px;line-height:2}
+  .choose li::marker{font:9px/1 var(--mono);color:var(--dim)}
+  .foot{margin-top:70px;border-top:1px solid var(--line-2);padding-top:18px;display:flex;justify-content:space-between;gap:20px;font:9px/1.6 var(--mono);color:var(--dim);letter-spacing:.08em}
+  @media (max-width:1100px){
+    .mast{grid-template-columns:1fr}
+    .draft,.draft:nth-child(even){grid-template-columns:1fr;gap:30px}
+    .draft:nth-child(even) .shots,.draft:nth-child(even) .copy{order:initial}
+    .choose{grid-template-columns:1fr;gap:30px}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="top">
+    <span><b>视频工坊</b> · 重新设计 · 2026-10-31</span>
+    <nav>
+      <a href="#a">A 暗房放映厅</a>
+      <a href="#b">B 纸本片场</a>
+      <a href="#c">C 调度台</a>
+      <a href="#choose">怎么选</a>
+    </nav>
+    <span>LEMO-OPUSCAR ONLY</span>
+  </header>
+
+  <section class="mast">
+    <div>
+      <p class="eyebrow"><span>01</span> REBUILD, NOT RESKIN</p>
+      <h1>视频工坊，<br><em>重做。</em></h1>
+      <p class="dek">旧的 HyperFrames 模板、小说分镜、Remotion/Warm、墨金/纸页/霓虹主题全部拆掉。新工坊只做 Lemo-Opuscar：66 种代码绘制的风格，真人导演 Agent 写片，工坊负责选风格、看帧、检查、渲染。</p>
+    </div>
+    <aside class="mast-side">
+      <p><b>三版可点稿</b>，都能点画廊、进新建、切阶段、跟导演说话。</p>
+      <p>不是三套皮肤：三版对「选风格」和「做到一半的掌控感」的侧重不同。</p>
+      <p>选定后，把选中的一版做成真的插件，并把另外两版里更好的局部并进去。</p>
+    </aside>
+  </section>
+
+  <div style="margin:40px 0 0;padding:16px 18px;border:1px solid var(--line-2);background:rgba(200,64,44,.06);display:flex;justify-content:space-between;gap:20px;align-items:baseline">
+    <span style="font:10px/1.5 var(--mono);letter-spacing:.1em;color:var(--red)">已选定 · A 暗房放映厅</span>
+    <span style="font-size:12px;color:var(--mut)">已实现进插件：A 的画廊/放映间 + B 的版本表/页脚质检 + C 的抽帧审查。B、C 留作参考。</span>
+  </div>
+
+  <article class="draft" id="a">
+    <div class="shots">
+      <div class="shot-main"><img src="shots/cinema-gallery.png" alt="暗房放映厅 · 画廊"></div>
+      <div class="shot-row">
+        <img src="shots/cinema-new.png" alt="暗房放映厅 · 新建">
+        <img src="shots/cinema-desk.png" alt="暗房放映厅 · 制作台">
+      </div>
+      <div class="shot-cap"><span>GALLERY / NEW / DESK</span><span>A · 044</span></div>
+    </div>
+    <div class="copy">
+      <div class="label"><b>A · 已选</b><span>BY GROK 4.7 · HIGH</span></div>
+      <h2>暗房<em>放映厅</em></h2>
+      <p class="tag">“海报在灯上，想法交给导演。”</p>
+      <p>最电影的一版。画廊像电影节节目册，制作台像放映间：一整块画面、下面的 takes 像胶片齿孔、右侧导演按帧说话。它把「选风格」做成了一件有仪式感的事。</p>
+      <ul>
+        <li><b>最强的地方</b>：海报的灯箱感、放映单、成片页的版本表（−14.1 LUFS / 2 分 18 秒）。</li>
+        <li><b>要接受的代价</b>：66 种风格按大图纵向排，找人比 C 慢；制作台的信息密度偏低。</li>
+        <li><b>适合</b>：把工坊当作品集和放映空间，每次只做一支片。</li>
+      </ul>
+      <a class="go" href="drafts/lemo-cinema/index.html">打开 A 的可点稿 →</a>
+      <div class="meta-row"><span>DARK · CINEMA</span><span>SONGTI / MONO</span><span>朱红 #E2452F</span></div>
+    </div>
+  </article>
+
+  <article class="draft" id="b">
+    <div class="shots" id="paper-shots">
+      <div class="shot-main"><img src="shots/paper-gallery.png" alt="纸本片场 · 目录"></div>
+      <div class="shot-row">
+        <img src="shots/paper-new.png" alt="纸本片场 · 新建">
+        <img src="shots/paper-desk.png" alt="纸本片场 · 制作台">
+      </div>
+      <div class="shot-cap"><span>CATALOG / BRIEF / DESK</span><span>B · 061</span></div>
+    </div>
+    <div class="copy">
+      <div class="label"><b>B</b><span>BY GROK 4.7 · HIGH</span></div>
+      <h2>纸本<em>片场</em></h2>
+      <p class="tag">“像一本拍摄档案，不像一块仪表盘。”</p>
+      <p>最印刷的一版。纸白、墨黑、一个朱红，画廊是带编号的影片目录，制作台是拍摄档案：阶段是章节，图版旁边是批注，质检像盖章。它把「做片」做成一份可以归档的文件。</p>
+      <ul>
+        <li><b>最强的地方</b>：图版目录、页脚双线质检、版本表；第 2 帧可以 lint 通过但同时写着「待改」。</li>
+        <li><b>要接受的代价</b>：浅色长时工作不如暗色沉浸；海报要靠在纸白上的版式撑，不能靠黑底发光。</li>
+        <li><b>适合</b>：喜欢把每支片的过程、依据和版本都留成档案的人。</li>
+      </ul>
+      <a class="go" href="drafts/lemo-paper/index.html">打开 B 的可点稿 →</a>
+      <div class="meta-row"><span>PAPER · LEDGER</span><span>SONGTI / MONO</span><span>朱红 #C8402C</span></div>
+    </div>
+  </article>
+
+  <article class="draft" id="c">
+    <div class="shots">
+      <div class="shot-main"><img src="shots/desk-gallery.png" alt="调度台 · 画廊"></div>
+      <div class="shot-row">
+        <img src="shots/desk-look.png" alt="调度台 · 风格帧">
+        <img src="shots/desk-film.png" alt="调度台 · 成片">
+      </div>
+      <div class="shot-cap"><span>GALLERY / LOOK / FILM</span><span>C · 022</span></div>
+    </div>
+    <div class="copy">
+      <div class="label"><b>C</b><span>BY DEEPSEEK · 本机</span></div>
+      <h2>调度<em>台</em></h2>
+      <p class="tag">“主帧、takes、时间轴、导演，同屏。”</p>
+      <p>最工具的一版。画廊仍然是海报，但制作台是控制台：主帧 + 三张 takes + 质检数字 + 一条真时间轴。它把「做到一半」的掌控感放在第一位，每一步都能看出这一版能不能交。</p>
+      <ul>
+        <li><b>最强的地方</b>：抽帧审查、时间轴、质检和版本在同一个屏幕；1280 宽也不挤。</li>
+        <li><b>要接受的代价</b>：画廊的仪式感弱于 A，单片沉浸感弱于 A；更像专业工具。</li>
+        <li><b>适合</b>：一天做几支片、要反复抽帧和比对版本的人。</li>
+      </ul>
+      <a class="go" href="drafts/lemo-desk/index.html">打开 C 的可点稿 →</a>
+      <div class="meta-row"><span>GRAPHITE · DESK</span><span>SONGTI / MONO</span><span>朱红 #E4572E</span></div>
+    </div>
+  </article>
+
+  <section class="choose" id="choose">
+    <div>
+      <h3>怎么选</h3>
+      <p>别看配色，看你想在工坊里待多久、待在哪。</p>
+      <ol>
+        <li>如果你更在意「打开就想选一个风格」——选 A。</li>
+        <li>如果你更在意「每支片的过程都能归档、能翻」——选 B。</li>
+        <li>如果你更在意「做到一半时，一眼知道哪一帧不对、哪一版能交」——选 C。</li>
+      </ol>
+    </div>
+    <div>
+      <h3>选定之后</h3>
+      <p>我会把选中的一版做成真的 DSH 插件：真实 Lemo 风格库、真实抽帧、真实渲染、真实导演会话。另外两版里更好的零件（A 的成片版本表、B 的批注、C 的时间轴）会并进去。</p>
+      <p>然后删掉旧插件和旧工程，用一支 30–45 秒的样片跑通整条管线。</p>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <span>视频工坊 v2 · LEMO-OPUSCAR ONLY</span>
+    <span>三版均为静态可点稿 · 数据为样例 · 1440×900</span>
+  </footer>
+</div>
+</body>
+</html>
