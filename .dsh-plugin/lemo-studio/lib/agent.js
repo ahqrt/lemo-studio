@@ -22,6 +22,8 @@ const STYLE_RULES = [
   '一次只改一处：画面错改绘制代码，时间轴错改 timeline，成片错改 mix/mux；三类一起动无法归因。',
   '不要执行整片渲染，除非用户明确要求；抽帧、contact sheet、10–15 秒草稿可以做。',
   '所有命令从库里跑：`cd "$LIB" && node core/render/still.mjs "<项目绝对路径>" 1.5`。项目里的页面用绝对 URL `/core/lib.js`。',
+  '工作区外（尤其是 $LIB）只读：不要安装依赖、不要下载采样库、不要写 $LIB。缺 voice/采样库就停下来告诉用户命令和体积，等用户明确同意，不要请求 danger-full-access。',
+  '声音优先用 $LIB/core/audio 的合成工具和项目里已有素材。需要外部采样库时，先说明为什么非它不可；能用合成替代就用合成。',
 ]
 
 export function actionLabel(action) {

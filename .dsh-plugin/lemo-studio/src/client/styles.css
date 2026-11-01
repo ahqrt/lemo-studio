@@ -435,6 +435,8 @@
 .ls-agent-head em { font: 10px/1.4 var(--mono); font-style: normal; color: var(--mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ls-agent-head button { font-size: 12px; color: var(--mute); }
 .ls-agent-head button:hover { color: var(--cream); }
+.ls-agent-head-actions { display: flex; align-items: center; gap: 10px; flex: none; }
+.ls-agent-stop { color: var(--red) !important; border-bottom: 1px solid rgba(226,69,47,.45); padding-bottom: 1px !important; font: 10px/1.4 var(--mono) !important; }
 .ls-dot { width: 5px; height: 5px; background: var(--sage); flex: none; align-self: center; }
 .ls-dot[data-running="true"] { background: var(--red); animation: ls-pulse 1.4s infinite; }
 @keyframes ls-pulse { 50% { opacity: 0.3; } }

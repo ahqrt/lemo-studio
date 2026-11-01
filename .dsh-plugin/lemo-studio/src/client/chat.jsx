@@ -136,6 +136,8 @@ export default function ChatDock({
   const inputRef = useRef(null)
   const stickRef = useRef(true)
   const [value, setValue] = useState('')
+  const [startedAt, setStartedAt] = useState(0)
+  const [now, setNow] = useState(Date.now())
   const suggestions = useMemo(() => STAGE_SUGGESTIONS[stage] || STAGE_SUGGESTIONS.look, [stage])
   const quick = QUICK[stage] || QUICK.brief
 
@@ -143,6 +145,25 @@ export default function ChatDock({
     const el = listRef.current
     if (el && stickRef.current) el.scrollTop = el.scrollHeight
   }, [messages, running])
+
+  useEffect(() => {
+    if (running && !startedAt) setStartedAt(Date.now())
+    if (!running) setStartedAt(0)
+  }, [running, startedAt])
+
+  useEffect(() => {
+    if (!running) return undefined
+    const timer = setInterval(() => setNow(Date.now()), 30_000)
+    return () => clearInterval(timer)
+  }, [running])
+
+  const elapsed = (() => {
+    if (!running || !startedAt) return ''
+    const seconds = Math.max(0, Math.round((now - startedAt) / 1000))
+    if (seconds < 60) return `${seconds}s`
+    if (seconds < 3600) return `${Math.round(seconds / 60)}m`
+    return `${Math.round(seconds / 3600)}h`
+  })()
 
   if (collapsed) {
     return (
@@ -166,9 +187,12 @@ export default function ChatDock({
         <div>
           <span className="ls-dot" data-running={running ? 'true' : 'false'} />
           <b>导演</b>
-          <em>{running ? '正在处理' : sessionId ? '项目会话 · 已绑定' : '项目会话 · 未绑定'}</em>
+          <em>{running ? `正在处理 · ${elapsed || '…'}` : sessionId ? '项目会话 · 已绑定' : '项目会话 · 未绑定'}</em>
         </div>
-        <button type="button" onClick={onToggle} aria-label="收起导演">⟩</button>
+        <div className="ls-agent-head-actions">
+          {running ? <button type="button" className="ls-agent-stop" onClick={onStop}>停止</button> : null}
+          <button type="button" onClick={onToggle} aria-label="收起导演">⟩</button>
+        </div>
       </header>
 
       <div
